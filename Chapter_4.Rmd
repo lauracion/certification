@@ -11,3 +11,28 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Notes for Chapter 4: Workflow
 
+```{r}
+# object <- value
+```
+
+This is an _assignment_ and it is read "object gets value"
+Alt + - is the shortcut for `<-` and it should be always sourrounded by spaces for readability.
+
+object names must start with a letter.
+
+```{r}
+this_is_a_long_name <- 2.5
+
+library(tidyverse)
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+
+filter(diamonds, carat > 3)
+
+```
+
+*Q* les anda el shortcut ctrl flecha para arriba de la seccion 4.2?
+
+Alt + Shift + K shortcut to all shortcuts
+
