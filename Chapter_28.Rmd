@@ -10,3 +10,19 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Notes for Chapter 28: Graphics for communication
+
+Cool extra read The truthful art by Alberto Cairo - does not seem to have an open version :_(
+
+Come to this chapter if you need details on how to tweak your plot for nice reporting. Including details about:
+
+* Labelling
+
+* Annotations
+
+* Changing and harmonizing scales
+
+* Zooming
+
+* All-things themes and more
+
+* Tips for sizing your plots withing Rmarkdown and also a bit about ggsave
