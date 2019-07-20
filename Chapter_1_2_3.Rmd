@@ -1,0 +1,270 @@
+---
+title: "Notes for Chapters 1 to 3"
+author: "Laura"
+date: "7/20/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter 1: Installing the packages that will be needed
+
+```{r packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+# install.packages(c("nycflights13", "gapminder", "Lahman"))
+
+```
+
+## Chapter 2: Introduction
+
+## Chapter 3: Data visualisation
+
+* Cool additional reading: [The Layered Grammar of Graphics](http://vita.had.co.nz/papers/layered-grammar.pdf).
+
+* `ggplot()` creates a coordinate system to which layers are added.
+
+* the geaom function in ggplot2 takes a ` mapping` argument. This defines how variable sin your dataset are mapped to visual properties.
+
+```{r ggplot1, message=FALSE, warning=FALSE}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+
+### 3.2.4 Excercises
+
+```{r ex3241}
+
+ggplot(data = mpg)
+
+mpg
+
+?mpg
+
+ggplot(mpg) + geom_point(mapping = aes(y = hwy, x = cyl))
+
+ggplot(mpg) + geom_point(mapping = aes(y = class, x = drv))
+
+```
+
+The plot of class vs drv is not useful because all observations are one on top of another.
+
+### 3.3 Aesthetic mappings
+
+An aesthetic is a visual property of the objects in your plot. It can be the location x and y of a point, a color, a shape, etc. To map an aesthetic to a variable, associate the name of the aesthetic to the name of the variables within `aes()`. ggplot2 automatically assigns a unique level of the aesthetic (e.g. a unique color), to each unique value of the variable, a process called _scaling_.
+
+```{r color}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+
+```
+```{r size}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size = class))
+
+```
+
+ggplot2 only uses six shapes at a time. Addiontional groups will go unplotted when you use the shape aesthetic. This happens with SUVs here. And you get a neat warning about it.
+
+```{r shape}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, shape = class))
+
+```
+```{r ggplot33}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+
+```
+
+### 3.3.1 Exercises
+
+```{r ex331}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
+  
+mpg
+
+```
+
+1. The points are not blue because color is within aes() and aes it is trying to find the variable blue to apply different colors to the values of that variable. However, this variable is passed as a string and hence, the point get the first color value that they would got if such a variable existed. In this case the color is pinkish.
+
+```{r ex332}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = displ))
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size = displ))
+# ggplot(data = mpg) +
+#  geom_point(mapping = aes(x = displ, y = hwy, shape = displ))
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = trans))
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, size = trans))
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, shape = trans))
+```
+ 
+
+```{r ex333}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = displ, size = displ))
+
+?geom_point
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = displ < 5))
+
+```
+
+### 3.5 Facets
+
+```{r facets}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_wrap(~ class, nrow = 2)
+```
+
+
+```{r facets1}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ cyl)
+```
+
+```{r facets2}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ class)
+```
+
+### 3.5.1 Exercises
+
+```{r ex351}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = cyl, y = hwy)) +
+  facet_grid(. ~ displ)
+```
+
+```{r ex3512}
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = drv, y = cyl))
+```
+
+```{r ex353}
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+```
+
+### 3.6 Geometric objects
+
+A geom is the geometrical object that a plot uses to represent data. Every geom function in ggplot2 takes a mapping argument. Not every aesthetic works with every geom.
+
+### 3.6.1 Exercises
+
+```{r ex3612}
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+```
+```{r ex3613}
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point() +
+  geom_smooth()
+
+ggplot() +
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+```
+
+```{r ex3616}
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(size = 3) +
+  geom_smooth(se = FALSE)
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) +
+  geom_point(size = 3) +
+  geom_smooth(aes(group = drv), se = FALSE)
+
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) +
+  geom_point(size = 5) +
+  geom_smooth(se = FALSE)
+
+
+```
+### 3.7 Statistical Transformations
+
+```{r transf}
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut))
+
+?geom_bar
+
+ggplot(data = diamonds) +
+  stat_count(mapping = aes(x = cut))
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
+
+```
+
+The algorithm used to calculate new values for a graph is called a stat, short for statistical transformation.
+
+### 3.7.1 Exercises
+
+```{r ex371}
+?geom_boxplot
+?geom_errorbar
+?geom_col
+?stat_smooth
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, y = ..prop..))
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop.., group = 0.5))
+
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop.., group = 2))
+
+
+```
+
+*Q* waht is the default geom associated with ` stat_summary()`? and exercise 3 y que onda el group = 1? y cuando agrego fill = color?
+
+### 3.8.1 Exercises
+
+me los saltie
+
+### 3.9 Coordinate systems
+
+### 3.9.1 Exercises
+
+```{r}
+ggplot(mpg, aes(x = cty, y = hwy)) +
+  geom_point() +
+  geom_abline() +
+  coord_fixed() # hace que se mantenga la escala en ambos ejes igual
+```
+
+
