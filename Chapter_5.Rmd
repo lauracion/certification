@@ -1,0 +1,71 @@
+---
+title: "Chapter 5"
+author: "Laura"
+date: "7/20/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Notes for Chapter 5: Data Transformation with `dplyr` 
+
+```{r lib, include=FALSE}
+
+library(nycflights13)
+library(tidyverse)
+
+```
+
+A _tibble_ is a data frame slightly tweaked to work better in the tidyverse.
+
+The six verbs of the language of data manipulation are: `filter()`, `arrange()`, `select()`, `mutate()`, `summarise()` and `group_by()`.
+
+### 5.2.2 Logical Operators
+
+When the logical statement gets too many parts, consider making each part a variable for code readability.
+
+Stay away from `&&` and `||` when using `filter()`.
+
+### 5.2.4 Excercises
+
+```{r ex524}
+flights
+
+filter(flights, arr_delay >= 120)
+
+filter(flights, dest == "IAH" | dest == "HOU")
+
+airlines
+
+filter(flights, carrier == "AA" | carrier == "DL" | carrier == "UA")
+
+filter(flights, month <= 9 & month >= 7)
+
+?between
+
+filter(flights, between(month, 7, 9))
+
+count(filter(flights, is.na(dep_time)))
+
+filter(flights, is.na(dep_time))
+
+NA^0
+NA*0
+
+```
+
+### 5.3 `arrange()`
+
+Missing values are always sorted at the end
+
+### 5.3.1 Exercises
+
+```{r ex531}
+arrange(flights, desc(is.na(dep_time)), dep_time)
+
+tail(arrange(flights, desc(is.na(dep_time)), dep_time))
+```
+
+### 
