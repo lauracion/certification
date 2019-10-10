@@ -113,6 +113,10 @@ Un modelo no busca revelar la verdad, si no descubrir una aproximación simple q
 
 ***
 
+#### Paquete `modelr`
+
+Este paquete anda lindo con funciones de modelado de R base y permite que usemos ` %>% `.
+
 ```{r 2311, message=FALSE}
 
 library(tidyverse)
@@ -120,4 +124,38 @@ library(tidyverse)
 library(modelr)
 
 options(na.action = na.warn)
+```
+
+***
+
+### Un modelito tranca
+
+```{r 232, message=FALSE}
+
+ggplot(sim1, aes(x, y)) + # sim1 viene con modelr
+  geom_point()
+```
+
+Que patron tiene este modelo lineal? (versión dominguera del color del caballo blanco de San Martín - sí, me tragué un payaso)
+
+***
+
+### Juguemos un toque a ver cómo podemos generar un modelo lineal
+
+Es decir, un modelo de esta familia $y = a_0 + a_1 * x$.
+
+
+```{r 2321, message=FALSE}
+
+# armamos un tibble con la columna a1 y la columna a2 generadas al azar como dos variables uniformes, una va entre -20 y 40 y la otra entre -5 y 5 Al ser uniformes, la probabilidad de que salga cualquiera de los numeros en ese rango es la misma
+models <- tibble(
+  a1 = runif(250, -20, 40),
+  a2 = runif(250, -5, 5)
+)
+
+# Al grafico de los puntos iniciales, le agregamos rectas al azar con ordenada al origen a1 y pendiente a2. Un bardito.
+ggplot(sim1, aes(x, y)) + 
+  geom_abline(aes(intercept = a1, slope = a2), data = models, alpha = 1/4) +
+  geom_point() 
+
 ```
