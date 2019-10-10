@@ -82,4 +82,42 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <br><br><br><br>
 
-####  Usted está _aquí_
+####  Intro
+
+* Vamos a usar modelos matemáticos para representar los datos como patrones y el resto, los residuales - que muchas veces solo representan ruido.
+
+* En este capítulo se usarán solo datos simulados, simples y sin interés práctico, pero que ayudan a entender la esencia del modelado.
+
+***
+
+#### El modelo y sus partes
+
+* Parte 1: Familia de modelos. La expresamos en forma generica como, por ejemplo:
+
+1. $y = a_1 * x + a_2$ (modelo lineal) o 
+2. $y = a_1 * x ^ {a_2}$ (modelo no lineal)
+
+En estos modelos $x$ e $y$ son columnas de nuestros datos tidy y $a_1$ y $a_2$ son parámetros que cambian para capturar distintos patrones en los datos.
+
+
+* Parte 2: Modelo ajustado (fitted). El modelo de la familia que es más cercano a los datos (cercano definido de alguna forma, hay muchas formas). El modelo ajustado tiene formas específicas tales como:
+
+1. $y = 3 * x + 7$ (modelo lineal) o 
+2. $y = 9 * x ^ 2$ (modelo cuadrático)
+
+El modelo ajustado es el modelo más cercano a los datos de toda la familia. Es el "mejor" modelo en cuanto a cercanía. Esto *nunca* implica que el modelo sea bueno o útil. Podrías tener el mejor de los peores.
+
+***
+
+Un modelo no busca revelar la verdad, si no descubrir una aproximación simple que sea útil.
+
+***
+
+```{r 2311, message=FALSE}
+
+library(tidyverse)
+
+library(modelr)
+
+options(na.action = na.warn)
+```
