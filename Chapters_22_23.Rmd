@@ -1,0 +1,161 @@
+---
+title: "Capítulos 22 y 23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br><br><br><br>
+
+### **Capítulo 22:** Introducción a Modelado
+
+<br><br><br><br>
+
+####  Usted está _aquí_
+
+![](figures\ch22_1.jpg)
+
+***
+
+#### Generalidades
+
+* El objetivo de un modelo es proveer un resumen de baja dimensión (poquitas variables) de una base de datos.
+
+* Idealmente, un modelo:
+
+1. Captura señales verdaderas (patrones generados por el fenómeno en estudio)
+
+2. Ignora ruido (variación azarosa que no nos interesa)
+
+* Vamos a estar viendo modelos predictivos (tambien se los nombra supervisados, ponele).
+
+
+***
+
+#### Qué se incluye en este "Usted está aquí" de Modelado
+
+* Capítulos 23 a 25 buscan construir la intuición de cómo funcionan estos modelos estadísticos.
+
+* Modelado Básico (Capi 23, hoy): cuestiones mecánicas sobre modelos lineales usando datos simulados (no reales).
+
+* Construcción de modelos (Capi 24, en dos domingos): formas para extraer patrones de datos reales.
+
+* En el capítulo 25 vamos a ver muchos modelos simples para entender bases de datos complejas.
+
+* Todos los contenidos serán sobre todo cualitativos (no habrá herramientas para cuantificar cuán bueno es un modelo).
+
+
+***
+
+#### Conceptos claves importantes para la vida (datera)
+
+* Cada observación puede ser usada para explorar los datos (análisis exploratorio, generación de hipótesis) o para confirmar una hipótesis (análisis inferencial) - *nunca ambas*.
+
+* Usa tus observaciones tantas veces como quieras para explorar tus datos. Usála sólo una vez para confirmar algo.
+
+* Tan pronto como usas un dato dos veces, acabás de pasar del marco confirmatorio al exploratorio (pero no hay warning de RStudio que te salve en esta).
+
+* Si no usas distintos datos para generar una hipotesis y para confirmarlas, vas a pecar de optimista (sobreajuste)
+
+* Si presentás un modelo exploratorio como uno confirmatorio vas a estar contribuyendo a la crisis de replicabilidad de la ciencia :-P
+
+
+***
+
+#### Tips para no meter la pata en la vida (datera)
+
+* Una forma  (de muchas) para no meter la pata es dividir tus datos en distintos conjuntos:
+
+1. Set de entrenamiento (training, para exploración), quizás 60% de tus datos
+
+2. Set para comparar modelos o visualizaciones en forma manual (query set). Para chequear algunas hipotesis generadas con el training set.
+
+3. Set de prueba (testing set). Lo usarás sólo una vez, para poner a prueba el modelo final.
+
+* Nota: igual un análisis descriptivo _siempre_ hay que hacerle al testing set.
+
+<br><br><br><br>
+
+### **Capítulo 23:** Modelado básico
+
+<br><br><br><br>
+
+####  Intro
+
+* Vamos a usar modelos matemáticos para representar los datos como patrones y el resto, los residuales - que muchas veces solo representan ruido.
+
+* En este capítulo se usarán solo datos simulados, simples y sin interés práctico, pero que ayudan a entender la esencia del modelado.
+
+***
+
+#### El modelo y sus partes
+
+* Parte 1: Familia de modelos. La expresamos en forma generica como, por ejemplo:
+
+1. $y = a_1 * x + a_2$ (modelo lineal) o 
+2. $y = a_1 * x ^ {a_2}$ (modelo no lineal)
+
+En estos modelos $x$ e $y$ son columnas de nuestros datos tidy y $a_1$ y $a_2$ son parámetros que cambian para capturar distintos patrones en los datos.
+
+
+* Parte 2: Modelo ajustado (fitted). El modelo de la familia que es más cercano a los datos (cercano definido de alguna forma, hay muchas formas). El modelo ajustado tiene formas específicas tales como:
+
+1. $y = 3 * x + 7$ (modelo lineal) o 
+2. $y = 9 * x ^ 2$ (modelo cuadrático)
+
+El modelo ajustado es el modelo más cercano a los datos de toda la familia. Es el "mejor" modelo en cuanto a cercanía. Esto *nunca* implica que el modelo sea bueno o útil. Podrías tener el mejor de los peores.
+
+***
+
+Un modelo no busca revelar la verdad, si no descubrir una aproximación simple que sea útil.
+
+***
+
+#### Paquete `modelr`
+
+Este paquete anda lindo con funciones de modelado de R base y permite que usemos ` %>% `.
+
+```{r 2311, message=FALSE}
+
+library(tidyverse)
+
+library(modelr)
+
+options(na.action = na.warn)
+```
+
+***
+
+### Un modelito tranca
+
+```{r 232, message=FALSE}
+
+ggplot(sim1, aes(x, y)) + # sim1 viene con modelr
+  geom_point()
+```
+
+Que patron tiene este modelo lineal? (versión dominguera del color del caballo blanco de San Martín - sí, me tragué un payaso)
+
+***
+
+### Juguemos un toque a ver cómo podemos generar un modelo lineal
+
+Es decir, un modelo de esta familia $y = a_0 + a_1 * x$.
+
+
+```{r 2321, message=FALSE}
+
+# armamos un tibble con la columna a1 y la columna a2 generadas al azar como dos variables uniformes, una va entre -20 y 40 y la otra entre -5 y 5 Al ser uniformes, la probabilidad de que salga cualquiera de los numeros en ese rango es la misma
+models <- tibble(
+  a1 = runif(250, -20, 40),
+  a2 = runif(250, -5, 5)
+)
+
+# Al grafico de los puntos iniciales, le agregamos rectas al azar con ordenada al origen a1 y pendiente a2. Un bardito.
+ggplot(sim1, aes(x, y)) + 
+  geom_abline(aes(intercept = a1, slope = a2), data = models, alpha = 1/4) +
+  geom_point() 
+
+```
