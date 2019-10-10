@@ -26,3 +26,27 @@ Come to this chapter if you need details on how to tweak your plot for nice repo
 * All-things themes and more
 
 * Tips for sizing your plots withing Rmarkdown and also a bit about ggsave
+
+```{r}
+df <- tibble(
+  x = runif(10),
+  y = runif(10),
+  z = as.factor(rpois(10, 2))
+)
+ggplot(df, aes(x, y, size = z)) +
+  geom_point() +
+  labs(
+    x = quote(sum(x[i] ^ 2, i == 1, n)),
+    y = quote(alpha + beta + frac(delta, theta)),
+    size = "Prueba"
+  )
+```
+```{r}
+presidential %>%
+  mutate(id = 33 + row_number()) %>%
+  ggplot(aes(start, id, colour = party)) +
+    geom_point() +
+    geom_segment(aes(xend = end, yend = id)) +
+    scale_colour_manual(values = c(Republican = "red", Democratic = "blue"))
+```
+

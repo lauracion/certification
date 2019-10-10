@@ -1,0 +1,85 @@
+---
+title: "Capítulos 22 y 23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br><br><br><br>
+
+### **Capítulo 22:** Introducción a Modelado
+
+<br><br><br><br>
+
+####  Usted está _aquí_
+
+![](figures\ch22_1.jpg)
+
+***
+
+#### Generalidades
+
+* El objetivo de un modelo es proveer un resumen de baja dimensión (poquitas variables) de una base de datos.
+
+* Idealmente, un modelo:
+
+1. Captura señales verdaderas (patrones generados por el fenómeno en estudio)
+
+2. Ignora ruido (variación azarosa que no nos interesa)
+
+* Vamos a estar viendo modelos predictivos (tambien se los nombra supervisados, ponele).
+
+
+***
+
+#### Qué se incluye en este "Usted está aquí" de Modelado
+
+* Capítulos 23 a 25 buscan construir la intuición de cómo funcionan estos modelos estadísticos.
+
+* Modelado Básico (Capi 23, hoy): cuestiones mecánicas sobre modelos lineales usando datos simulados (no reales).
+
+* Construcción de modelos (Capi 24, en dos domingos): formas para extraer patrones de datos reales.
+
+* En el capítulo 25 vamos a ver muchos modelos simples para entender bases de datos complejas.
+
+* Todos los contenidos serán sobre todo cualitativos (no habrá herramientas para cuantificar cuán bueno es un modelo).
+
+
+***
+
+#### Conceptos claves importantes para la vida (datera)
+
+* Cada observación puede ser usada para explorar los datos (análisis exploratorio, generación de hipótesis) o para confirmar una hipótesis (análisis inferencial) - *nunca ambas*.
+
+* Usa tus observaciones tantas veces como quieras para explorar tus datos. Usála sólo una vez para confirmar algo.
+
+* Tan pronto como usas un dato dos veces, acabás de pasar del marco confirmatorio al exploratorio (pero no hay warning de RStudio que te salve en esta).
+
+* Si no usas distintos datos para generar una hipotesis y para confirmarlas, vas a pecar de optimista (sobreajuste)
+
+* Si presentás un modelo exploratorio como uno confirmatorio vas a estar contribuyendo a la crisis de replicabilidad de la ciencia :-P
+
+
+***
+
+#### Tips para no meter la pata en la vida (datera)
+
+* Una forma  (de muchas) para no meter la pata es dividir tus datos en distintos conjuntos:
+
+1. Set de entrenamiento (training, para exploración), quizás 60% de tus datos
+
+2. Set para comparar modelos o visualizaciones en forma manual (query set). Para chequear algunas hipotesis generadas con el training set.
+
+3. Set de prueba (testing set). Lo usarás sólo una vez, para poner a prueba el modelo final.
+
+* Nota: igual un análisis descriptivo _siempre_ hay que hacerle al testing set.
+
+<br><br><br><br>
+
+### **Capítulo 23:** Modelado básico
+
+<br><br><br><br>
+
+####  Usted está _aquí_
