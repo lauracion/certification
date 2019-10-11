@@ -159,3 +159,73 @@ ggplot(sim1, aes(x, y)) +
   geom_point() 
 
 ```
+* Hay 250 líneas (modelos) en el gráfico, una por cada $a_1$ y $a_2$ generadas. 
+
+* Hay un montón de líneas uqe no tienen nada que ver con los puntos de los datos `sim1`. 
+
+* Qué significa exactamente estar cerca de los datos?
+
+* Una forma de estar cerca podría ser encontrar la línea con $a_1$ y $a_2$ cuya distancia vertical a cada punto de `sim1` sea mínima. Como en esta figura (hay líneas torcidas para que se vean todas).
+
+***
+
+![](figures\ch23_1.jpg)
+* La línea azul representa la diferencia entre el valor de $y$ dado por el modelo (predicción) y cada punto en `sim1`.
+
+***
+
+### Mínimos Cuadrados a Manopla
+
+* Pocas cosas mejores que programar un método para entender de qué se trata. Vamos a tratar de encontrar la mejor línea usando código.
+
+* *Paso 1.* usando dos posibles $a_1$ y $a_2$, generar predicciones para los 30 pares de datos en `sim1`.
+
+```{r 2322, message=FALSE}
+
+model1 <- function(a, data) {
+  a[1] + data$x * a[2]
+}
+model1(c(7, 1.5), sim1)
+
+```
+
+* *Paso 2.* Calculamos las distancias entre cada punto en `sim1` y estas predicciones
+
+* *Paso 3.* Colapsamos las 30 distancias en un solo número. Una forma matemáticamente bonita y conveniente de hacerlo es elevando cada diferencia al cuadrado y tomando el promedio de la suma de esos cuadrados y sacando la raíz cuadrada de ese promedio (error cuadrático medio)
+
+```{r 2323, message=FALSE}
+
+measure_distance <- function(mod, data) {
+  diff <- data$y - model1(mod, data)
+  sqrt(mean(diff ^ 2))
+}
+measure_distance(c(7, 1.5), sim1)
+```
+
+* *Paso 4.* Repetimos 1 a 3 para cada uno de los 250 modelos que generamos en `models`
+
+```{r 2324, message=FALSE}
+
+sim1_dist <- function(a1, a2) {
+  measure_distance(c(a1, a2), sim1)
+}
+
+# usamos purrr con la helper function sim1_dist que toma 2 parametros double
+models <- models %>% 
+  mutate(dist = purrr::map2_dbl(a1, a2, sim1_dist))
+models
+```
+
+* *Paso 5.* veamos qué pinta tinen los 10 modelos cuya `dist` es la menor
+
+
+```{r 2325, message=FALSE}
+
+ggplot(sim1, aes(x, y)) + 
+  geom_point(size = 2, colour = "grey30") + 
+  geom_abline(
+    aes(intercept = a1, slope = a2, colour = -dist), 
+    data = filter(models, rank(dist) <= 10)
+  )
+```
+
