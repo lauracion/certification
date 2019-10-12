@@ -378,5 +378,25 @@ Si hay ningún patrón cuando graficamos los predictores en funcion de los resid
 
 ***
 
-### Cómo funcionan las fórmulas para distintos modelos
+### Un chapuzón al mundo de las fórmulas en R
+
+* Las fórmulas en R, esos enunciados que incluyen un `~`, nos ofrecen una forma de capturar la estructura de variables que las funciones de R pueden interpretar.
+
+* Para ver qué es lo que R hace realmente cuando le decimos `y ~ x` para representar $y = a_1 + a_2 * x$, podemos usar `modelr::model_matrix()`.
+
+```{r 2341, message=FALSE}
+df <- tribble(
+  ~y, ~x1, ~x2,
+  4, 2, 5,
+  5, 1, 6
+)
+model_matrix(df, y ~ x1 + x2)
+```
+
+* Notá que para representar la ordenada al origen, R agrega una columna de unos. Si no la querés, hay que pedirle explícitamente que la saque usando `-1`.
+
+```{r 2342, message=FALSE}
+model_matrix(df, y ~ x1 + x2 - 1)
+```
+
 
