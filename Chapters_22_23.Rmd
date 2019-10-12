@@ -460,7 +460,7 @@ ggplot(sim2, aes(x)) +
 
 Ojo con querer hacerle predecir para una clase de la categoría que no estaba en los datos originales:
 
-```{r 2348, message=FALSE}
+```{r 2348, eval=FALSE, message=FALSE, include=FALSE}
 tibble(x = "e") %>% 
   add_predictions(mod2)
 ```
@@ -529,4 +529,83 @@ ggplot(sim3, aes(x1, resid, colour = x2)) +
 
 ### Y si tengo dos predictoras continuas?
 
+Usamos `sim4`. Misma cosa que al comienzo de la sección anterior para ajustar los dos modelos posibles.
 
+```{r 23414, message=FALSE}
+mod1 <- lm(y ~ x1 + x2, data = sim4)
+mod2 <- lm(y ~ x1 * x2, data = sim4)
+
+grid <- sim4 %>% 
+  data_grid(
+    x1 = seq_range(x1, 5), 
+    x2 = seq_range(x2, 5) 
+  ) %>% 
+  gather_predictions(mod1, mod2)
+grid
+```
+
+* Un detalle de este código es el uso de `modelr::seq_range()` dentro de `data_grid()`.
+
+* En lugar de usar cada valor único de $x$, `seq_range` permite usar una grilla de 5 valores regularmente distribuidos entre el minimo y máximo de $x$.
+
+* `seq_range() tiene opciones interesantes como `pretty = TRUE`,
+
+```{r 23415, message=FALSE}
+seq_range(c(0.0123, 0.923423), n = 5)
+seq_range(c(0.0123, 0.923423), n = 5, pretty = TRUE)
+```
+
+* `trim = 0.1` - que corta los valores de las colas más allá del 10% para variables con cola larga y cuando nos interesa hacer foco en los valores más centrales.
+
+```{r 23416, message=FALSE}
+x1 <- rcauchy(100)
+seq_range(x1, n = 5)
+seq_range(x1, n = 5, trim = 0.10)
+seq_range(x1, n = 5, trim = 0.25)
+seq_range(x1, n = 5, trim = 0.50)
+```
+
+* y `expand = 0.1` que es como el opuesto de trim
+
+```{r 23417, message=FALSE}
+x2 <- c(0, 1)
+seq_range(x2, n = 5)
+seq_range(x2, n = 5, expand = 0.10)
+seq_range(x2, n = 5, expand = 0.25)
+seq_range(x2, n = 5, expand = 0.50)
+```
+
+Digresión aparte, tratemos de ver qué onda las predicciones de los modelos:
+
+```{r 23418, message=FALSE}
+ggplot(grid, aes(x1, x2)) + 
+  geom_tile(aes(fill = pred)) + 
+  facet_wrap(~ model)
+```
+
+Mirados desde arriba, nuestros modelos son dos superficies que a priori se parecen. Veamos si logramos que se diferencien mirándolos de costado en varios cortes:
+
+```{r 23419, message=FALSE}
+ggplot(grid, aes(x1, pred, colour = x2, group = x2)) + 
+  geom_line() +
+  facet_wrap(~ model)
+
+ggplot(grid, aes(x2, pred, colour = x1, group = x1)) + 
+  geom_line() +
+  facet_wrap(~ model)
+```
+
+Ponele que la interacción está justificada. HW dice que los residuos para el modelo 2 se ven sutilmente mejor y lo deja como ejercicio.
+
+***
+
+### Jugando con transformaciones y splines
+
+***
+
+### Me faltan valores o valores faltantes
+
+
+***
+
+### Para un breve compendio de otros modelos posibles, más allá de los lineales, vean 23.6
