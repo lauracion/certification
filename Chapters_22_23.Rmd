@@ -464,3 +464,69 @@ Ojo con querer hacerle predecir para una clase de la categoría que no estaba en
 tibble(x = "e") %>% 
   add_predictions(mod2)
 ```
+
+
+***
+
+### Modelo lineal con una predictora categórica y una continua
+
+Usamos `sim3`
+
+```{r 2349, message=FALSE}
+ggplot(sim3, aes(x1, y)) + 
+  geom_point(aes(colour = x2))
+```
+
+Podemos ajustarle dos modelos que incluyan ambas predictoras:
+
+```{r 23410, message=FALSE}
+mod1 <- lm(y ~ x1 + x2, data = sim3)
+mod2 <- lm(y ~ x1 * x2, data = sim3)
+```
+
+* `y ~ x1 + x2` es $y = a_0 + a_1 * x_1 + a_2 * x_2 $
+
+* `y ~ x1 * x2` es $y = a_0 + a_1 * x_1 + a_2 * x_2 + a_{12} * x_1 * x_2$
+
+Generemos predicciones para estos modelos y veamos cómo les va:
+
+```{r 23411, message=FALSE}
+grid <- sim3 %>% 
+# a data_grid hay que pasarle las dos predictoras para que genere valores para las combinaciones de ambas variables
+   data_grid(x1, x2) %>%
+# gather_predictions genera predicciones para ambos modelos y los pone en una sola columna. Tiene a su amiga spread_predictions que las pone en una columna para mod1 y otra para mod2
+  gather_predictions(mod1, mod2)
+grid
+```
+
+Miramos la pinta de las predicciones:
+
+```{r 23412, message=FALSE}
+ggplot(sim3, aes(x1, y, colour = x2)) + 
+  geom_point() + 
+  geom_line(data = grid, aes(y = pred)) + 
+  facet_wrap(~ model)
+```
+
+* En el modelo que usa $+$ las rectas tienen la misma pendiente, no así en la que usa $*$.
+
+* Cuál de los dos modelos será mejor? Veamos si los residuales de cada modelo nos pueden dar una pista
+
+```{r 23413, message=FALSE}
+sim3 <- sim3 %>% 
+  gather_residuals(mod1, mod2)
+
+ggplot(sim3, aes(x1, resid, colour = x2)) + 
+  geom_point() + 
+  facet_grid(model ~ x2)
+```
+
+* El gráfico nos permite ver que `mod1` se dejó un patrón en los residuos para $x_2 = b$, $x_2 = c$ y $x_2 = d$
+
+* Formas cuantitativas de comparar modelos quedan fuera del alcance del libro 
+
+***
+
+### Y si tengo dos predictoras continuas?
+
+
