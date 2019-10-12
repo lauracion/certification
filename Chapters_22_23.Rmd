@@ -13,13 +13,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <br><br><br><br>
 
-####  Usted está _aquí_
+###  Usted está _aquí_
 
 ![](figures\ch22_1.jpg)
 
 ***
 
-#### Generalidades
+### Generalidades
 
 * El objetivo de un modelo es proveer un resumen de baja dimensión (poquitas variables) de una base de datos.
 
@@ -34,7 +34,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ***
 
-#### Qué se incluye en este "Usted está aquí" de Modelado
+### Qué se incluye en este "Usted está aquí" de Modelado
 
 * Capítulos 23 a 25 buscan construir la intuición de cómo funcionan estos modelos estadísticos.
 
@@ -49,7 +49,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ***
 
-#### Conceptos claves importantes para la vida (datera)
+### Conceptos claves importantes para la vida (datera)
 
 * Cada observación puede ser usada para explorar los datos (análisis exploratorio, generación de hipótesis) o para confirmar una hipótesis (análisis inferencial) - *nunca ambas*.
 
@@ -64,7 +64,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ***
 
-#### Tips para no meter la pata en la vida (datera)
+### Tips para no meter la pata en la vida (datera)
 
 * Una forma  (de muchas) para no meter la pata es dividir tus datos en distintos conjuntos:
 
@@ -82,7 +82,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <br><br><br><br>
 
-####  Intro
+###  Intro
 
 * Vamos a usar modelos matemáticos para representar los datos como patrones y el resto, los residuales - que muchas veces solo representan ruido.
 
@@ -90,7 +90,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ***
 
-#### El modelo y sus partes
+### El modelo y sus partes
 
 * Parte 1: Familia de modelos. La expresamos en forma generica como, por ejemplo:
 
@@ -113,7 +113,7 @@ Un modelo no busca revelar la verdad, si no descubrir una aproximación simple q
 
 ***
 
-#### Paquete `modelr`
+### Paquete `modelr`
 
 Este paquete anda lindo con funciones de modelado de R base y permite que usemos ` %>% `.
 
@@ -340,3 +340,43 @@ Pará, pará, pará... pero no es más fácil hacerlo con `geom_abline()`? Sí, 
 ***
 
 ### Visualizando un modelo a través de sus residuos
+
+* La otra cara de las predicciones son los residuales.
+
+* Las predicciones nos dicen qué patrones capturó el modelo.
+
+* Los residuales nos dicen qué patrones no capturó.
+
+* Son las distancia entre los datos observados y los valores predichos por el modelo.
+
+* Si nuestro modelo capturó todos los patrones, los residuales no deberían mostrarnos ningún patrón y estar, en promedio cerca de 0 y no muy lejos de los valores observados.
+
+```{r 2334, message=FALSE}
+# add_residuals de modelr agrega residuales
+sim1 <- sim1 %>% 
+  add_residuals(sim1_mod)
+sim1
+```
+
+Con un polígono de frecuencias podemos entender cómo se distribuyen los residuales.
+
+```{r 2335, message=FALSE}
+ggplot(sim1, aes(resid)) + 
+  geom_freqpoly(binwidth = 0.5)
+```
+
+Otra forma de ver los residuales es ver cómo se relacionan con los predictores en nuestro modelo.
+
+```{r 2336, message=FALSE}
+ggplot(sim1, aes(x, resid)) + 
+  geom_ref_line(h = 0) +
+  geom_point()
+```
+
+Si hay ningún patrón cuando graficamos los predictores en funcion de los residuos, quiere decir que no nos quedaron patrones por aprender y que el modelo que tenemos capturó toda la información que había en los datos.
+ 
+
+***
+
+### Cómo funcionan las fórmulas para distintos modelos
+
