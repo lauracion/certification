@@ -216,7 +216,7 @@ models <- models %>%
 models
 ```
 
-* *Paso 5.* veamos qué pinta tinen los 10 modelos cuya `dist` es la menor
+* *Paso 5, primer intento.* Queremos encontrar la mejor recta (la más cercana a los datos) veamos qué pinta tienen los 10 modelos con menor `dist`
 
 
 ```{r 2325, message=FALSE}
@@ -229,3 +229,114 @@ ggplot(sim1, aes(x, y)) +
   )
 ```
 
+* *Paso 5, segundo intento.* También podemos graficar todas los pares $a_1$ y $a_2$, colorear por `-dist` y marcar los 10 pares con la menor `dist`
+
+```{r 2326, message=FALSE}
+
+ggplot(models, aes(a1, a2)) +
+  geom_point(data = filter(models, rank(dist) <= 10), size = 4, colour = "red") +
+  geom_point(aes(colour = -dist))
+```
+
+* *Paso 5, mejorado.* Combinamos el Paso 4 y el 5 pero en lugar de hacerlo con modelos al azar, lo hacemos de una forma sistemática buscando los parámetros en una grilla de parámetros distribuidos uniformemente (grid search).
+
+```{r 2327, message=FALSE}
+
+# los parametros para la grilla salen de mirar el grafico anterior y ver donde estaban los mejores parámetros
+# expand.grid es una funcion de R base que crea un dataframe de todas las combinaciones de dos factores
+grid <- expand.grid(
+  a1 = seq(-5, 20, length = 25),
+  a2 = seq(1, 3, length = 25)
+  ) %>% 
+  mutate(dist = purrr::map2_dbl(a1, a2, sim1_dist))
+
+grid %>% 
+  ggplot(aes(a1, a2)) +
+  geom_point(data = filter(grid, rank(dist) <= 10), size = 4, colour = "red") +
+  geom_point(aes(colour = -dist)) 
+
+```
+
+Cómo les va con los datos a estos 10 mejores pares de parámetros?
+
+```{r 2328, message=FALSE}
+
+ggplot(sim1, aes(x, y)) + 
+  geom_point(size = 2, colour = "grey30") + 
+  geom_abline(
+    aes(intercept = a1, slope = a2, colour = -dist), 
+    data = filter(grid, rank(dist) <= 10)
+  )
+
+```
+
+* *Paso 5, intento final.* Podrías repetir el intento final haciendo la grilla cada vez más fina hasta que encontrás el mejor modelo. Hay un algoritmo que lo hace llamado búsqueda de Newto-Raphson y que está implementado en la funcion `optim()` del paquete `stats` en R base.
+
+```{r 2329, message=FALSE}
+
+best <- optim(c(0, 0), measure_distance, data = sim1)
+best$par
+
+ggplot(sim1, aes(x, y)) + 
+  geom_point(size = 2, colour = "grey30") + 
+  geom_abline(intercept = best$par[1], slope = best$par[2])
+```
+
+La intuicion detras de `optim()` es que si tenes:
+
+* una función que define la distancia entre un modelo 
+* un set de datos 
+* un algoritmo que puede minimizar la distancia modificando los parámetros del modelo
+
+podés encontrar el mejor modelo. 
+
+La belleza de esto es que esto lo podés usar para cualquier familia de modelos para los que puedas escribir una ecuación.
+
+* *Paso 5, intento final usando matemática.* $y = a_1 + a_2 * x$ es un modelo lineal y en estos casos R tiene la función `lm()` para ajustarlo
+
+```{r 23210, message=FALSE}
+# lm() usa formulas, en este caso y ~ x es la forma de escribir y = a_1 + a_2 * x
+sim1_mod <- lm(y ~ x, data = sim1)
+coef(sim1_mod)
+```
+
+Obtenemos al segundo decimal lo mismo que con `optim()`.  `lm()` es mucho mas rapido y mejor porque resuelve todo en un solo paso y garantiza que encuentra el mejor modelo. Usa una formula matematica que se puede derivar para los modelos lineales. La mayoria de los modelos no tienen estas formulas o a veces calcularlas es dificil y se termina usando algo como `optim()`.
+
+***
+
+### Visualizando un modelo a través de sus predicciones
+
+
+* Mirar un modelo a través de sus predicciones tiene la ventaja de que lo podés hacer para cualquier modelo predictivo - incluso los que tienen ecuaciones difíciles de dibujar en dos o tres dimensiones.
+
+* Usando `modelr::data_grid()` se puede generar una grilla de valores que cubra la region donde viven los datos que observamos - en este caso `sim1`
+
+```{r 2331, message=FALSE}
+grid <- sim1 %>% 
+  data_grid(x) 
+grid
+```
+
+La salida es mucho mas interesante cuando tenemos mas variables en nuestro modelo.
+
+A esta grilla le agregamos predicciones usando `modelr::add_predictions()` usando el modelo `sim1_mod`.
+
+```{r 2332, message=FALSE}
+grid <- grid %>% 
+  add_predictions(sim1_mod) 
+grid
+```
+
+Y ahora podemos graficar las predicciones sobre nuestros datos originales.
+
+```{r 2333, message=FALSE}
+ggplot(sim1, aes(x)) +
+  geom_point(aes(y = y)) +
+  geom_line(aes(y = pred), data = grid, colour = "red", size = 1)
+```
+
+Pará, pará, pará... pero no es más fácil hacerlo con `geom_abline()`? Sí, cuando tu modelo tiene una ordenada al origen y una pendiente, pero modelos más complicados no tienen sólo dos parámetros, tienen un montón. Siempre podés visualizar sus predicciones y ver cómo funcionan para tus datos.
+
+***
+
+### Visualizando un modelo a través de sus residuos
