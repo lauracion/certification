@@ -159,6 +159,7 @@ ggplot(sim1, aes(x, y)) +
   geom_point() 
 
 ```
+
 * Hay 250 líneas (modelos) en el gráfico, una por cada $a_1$ y $a_2$ generadas. 
 
 * Hay un montón de líneas uqe no tienen nada que ver con los puntos de los datos `sim1`. 
@@ -170,6 +171,7 @@ ggplot(sim1, aes(x, y)) +
 ***
 
 ![](figures\ch23_1.jpg)
+
 * La línea azul representa la diferencia entre el valor de $y$ dado por el modelo (predicción) y cada punto en `sim1`.
 
 ***
@@ -660,6 +662,7 @@ sim5 <- tibble(
 ggplot(sim5, aes(x, y)) +
   geom_point()
 ```
+
 Usando estos cinco modelos:
 
 ```{r 23424, message=FALSE}
