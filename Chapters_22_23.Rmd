@@ -599,12 +599,124 @@ Ponele que la interacción está justificada. HW dice que los residuos para el m
 
 ***
 
-### Jugando con transformaciones y splines
+### Diciendole a R cómo transformar datos - ojo al piojo, habemus necesidad de truco
+
+* En algunos casos vamos a hacer transformaciones dentro del modelo. Hay que tener algunos cuidados para indicarselo a R.
+
+* Ejemplos:
+
+`log(y) ~ sqrt(x1) + x2` es $log(y) = a_1 + a_2 * \sqrt{x_1} + a_3 * x_2$ 
+
+*pero*
+
+`y ~ x ^ 2 + x` es $y = a_1 + a_2 * x$
+
+* Las transformaciones que involucran $+$, $*$, $^$ o $-$ hay que indicarlas con `I()`.
+
+* Es así que $y = a_1 + a_2 * x + a_3 * x^2$ se indica `y ~ x + I(x ^ 2)`
+
+* Ante la duda de cuál es la estructura de $x$ que está ajustando `lm()`, siempre puede venir `model_matrix()` al rescate:
+
+```{r 23420, message=FALSE}
+df <- tribble(
+  ~y, ~x,
+   1,  1,
+   2,  2, 
+   3,  3,
+   4,  4
+)
+model_matrix(df, y ~ x^2 + x)
+model_matrix(df, y ~ I(x^2) + x)
+```
+
+***
+
+### Transformaciones polinomiales
+
+
+* Gracias al teorema de Taylor, podemos usar un polinomio para a cualquier función suave.
+
+* Un polinomio tiene esta pinta $y = a_1 + a_2 * x + a_3 * x^2 + a_4 * x^3$ y R nos puede ayudar a tipearla usando la función `poly()`  
+
+```{r 23421, message=FALSE}
+model_matrix(df, y ~ poly(x, 3))
+```
+
+* Fuera del rango de los datos, los polinomios se van rápido a $-\infty$ o $+\infty$. `splines::ns()` nos puede dar una mano para que esto no le ocurra a nuestras transformaciones
+
+```{r 23422, message=FALSE}
+library(splines)
+model_matrix(df, y ~ ns(x, 3))
+```
+
+* Un ejemplo bonito, pero medio irrelevante para mi gusto, aproximar datos generados usando $y = 4*sen(x)$
+
+```{r 23423, message=FALSE}
+sim5 <- tibble(
+  x = seq(0, 3.5 * pi, length = 50),
+  y = 4 * sin(x) + rnorm(length(x))
+)
+
+ggplot(sim5, aes(x, y)) +
+  geom_point()
+```
+Usando estos cinco modelos:
+
+```{r 23424, message=FALSE}
+mod1 <- lm(y ~ ns(x, 1), data = sim5)
+mod2 <- lm(y ~ ns(x, 2), data = sim5)
+mod3 <- lm(y ~ ns(x, 3), data = sim5)
+mod4 <- lm(y ~ ns(x, 4), data = sim5)
+mod5 <- lm(y ~ ns(x, 5), data = sim5)
+
+grid <- sim5 %>% 
+  data_grid(x = seq_range(x, n = 50, expand = 0.1)) %>% 
+  gather_predictions(mod1, mod2, mod3, mod4, mod5, .pred = "y")
+
+ggplot(sim5, aes(x, y)) + 
+  geom_point() +
+  geom_line(data = grid, colour = "red") +
+  facet_wrap(~ model)
+```
+
+* Fuera del rango de los datos, es medio un desastre, pero está bien, porque no queremos usar el modelo cuando no hubo datos que lo respalden. En cualquier caso, extrapolar es una mala idea.
+
 
 ***
 
 ### Me faltan valores o valores faltantes
 
+* Si tenés datos faltantes, no hay información para resumir en el modelo, por lo  cual el comportamiento por defecto de R es descartarlos.
+
+* R lo hace en forma silente, a menos que especifiques `options(na.action = na.warm)` como hicimos al principio del capítulo.
+
+
+```{r 2351, message=FALSE}
+df <- tribble(
+  ~x, ~y,
+  1, 2.2,
+  2, NA,
+  3, 3.5,
+  4, 8.3,
+  NA, 10
+)
+
+mod <- lm(y ~ x, data = df)
+```
+
+Usando el argumento `na.action = na.exclude` lo podés sileanciar:
+
+```{r 2352, message=FALSE}
+mod <- lm(y ~ x, data = df, na.action = na.exclude)
+```
+
+y usando `nobs()` se puede saber cuántos datos usó el modelo para su ajuste:
+
+```{r 2353, message=FALSE}
+nobs(mod)
+```
+
+* De una forma u otra, siempre es bueno estar al tanto de si me faltan o no datos en mis ajustes
 
 ***
 
