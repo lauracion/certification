@@ -1,0 +1,49 @@
+---
+title: "Tidy Tuesday Practice"
+author: "Laura"
+date: "11/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(skimr)
+
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+
+## Como evolucionaron los lanzamientos espaciales a lo largo del tiempo
+
+```{r data_reading, message=FALSE, warning=FALSE, include=FALSE}
+
+agencies <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-15/agencies.csv")
+
+launches <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-15/launches.csv")
+
+```
+
+```{r initial_summary_ag, message=FALSE, warning=FALSE, include=FALSE}
+
+agencies
+
+```
+
+The agencies data base has 74 observations and 19 variables. The 74 records correspond to all the spacial agencies recorded and their characteristics. It has the total number of launches per agency, but that will not help seeing the evolution over time due to its aggregated nature.
+
+```{r initial_summary_lch, message=FALSE, warning=FALSE, include=FALSE}
+
+launches
+launches %>% glimpse()
+launches %>% skim()
+
+launches_skimmed <- skim(launches)
+
+launches_skimmed
+
+
+```
+
+The launches data base has 5726 individual launches, with several characteristics of each launch including the date of each launch which seems more relevant to address the question at hand. The most informative variable in the data set to address this question seems to be `launch_year`. This feature is the year of each of the launches in this dataset. This feature has `r launches_skimmed$launch_
+
+
