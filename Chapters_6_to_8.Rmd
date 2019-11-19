@@ -8,9 +8,10 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
-library(tidyverse)
+library(tidyverse); library(skimr); library(nycflights13)
+library(GGally)
 
-library(skimr)
+
 ```
 
 ## Notes for Chapter 6: Workflow: scripts 
@@ -294,13 +295,56 @@ bpflip +  xlab("Car class")
 ```
 
 #### 7.5.1.1 Exercises
-Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.
 
-What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?
+* Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.
 
-Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
+```{r ex75111}
+flights <- flights %>% 
+  mutate(
+    cancelled = is.na(dep_time),
+    sched_hour = sched_dep_time %/% 100,
+    sched_min = sched_dep_time %% 100,
+    sched_dep_time_h = sched_hour + sched_min / 60
+  )
 
-One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
+ggplot(flights) +
+  geom_boxplot(aes(cancelled, sched_dep_time_h))
+
+ggplot(flights) +
+  geom_jitter(aes(cancelled, sched_dep_time_h))
+
+ggplot(flights) +
+  geom_violin(aes(cancelled, sched_dep_time_h))
+
+ggplot(flights) +
+  geom_freqpoly(aes(sched_dep_time_h, y = ..density.., color = cancelled))
+
+```
+
+* What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?
+
+```{r ex75112}
+# GGally::ggpairs allows to inspect the bivariate relationship of several variables at a time
+diamonds %>% ggpairs(columns = c(1, 5, 7:10))
+
+ggplot(diamonds) +
+  geom_boxplot(aes(cut, carat))
+
+ggplot(diamonds) +
+  geom_violin(aes(cut, carat))
+
+ggplot(diamonds) +
+  geom_histogram(aes(carat, y = ..density..)) +
+  facet_wrap(~ cut, ncol = 1)
+
+
+```
+
+Carat seems the most important variable for predicting the price of a diamond. We have a lot more ideal and premium  cut diamonds of low carat than very good or lower cuts diamonds. The higher the carat, the higher the price. That explains that diamonds with a better cut appear to be cheaper, they are of lower carat on average than worse cut diamonds. 
+
+* Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
+
+* One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
 
 Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?
 
@@ -311,3 +355,4 @@ If you have a small dataset, it’s sometimes useful to use geom_jitter() to see
 ## Wishlist:
 
 Using purrr for a histogram with varying bandwidths.
+Using purrr to load several packages at one time?
