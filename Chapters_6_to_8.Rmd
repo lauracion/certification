@@ -8,9 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
-library(tidyverse); library(skimr); library(nycflights13)
-library(GGally)
-
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr)
 
 ```
 
@@ -344,11 +342,121 @@ Carat seems the most important variable for predicting the price of a diamond. W
 
 * Install the ggstance package, and create a horizontal boxplot. How does this compare to using coord_flip()?
 
+```{r ex75113}
+ggplot(diamonds) +
+  geom_boxplot(aes(cut, carat)) +
+  coord_flip()
+
+# note that for geom_boxploth to run well you have to invert the order of the aes arguments
+ggplot(diamonds) +
+  geom_boxploth(aes(carat, cut))
+
+```
+I don't see any difference between the outputs of using `coord_flip` to `geom_boxploth`. But I had to invert the order of the arguments in `geom_boxploth` in order for it to run correctly.
+
+
 * One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?
 
-Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?
+* Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?
 
-If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.
+* If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.
+
+### 7.5.2 Two categorical variables
+
+```{r ch7521}
+
+ggplot(diamonds) +
+  geom_count(aes(cut, color))
+
+diamonds %>% 
+  count(color, cut)
+
+
+diamonds %>% 
+  count(color, cut) %>% 
+  ggplot(aes(cut, color, fill = n)) +
+    geom_tile()
+```
+If the categorical variables are unordered, you might want to use the `seriation` package to simultaneously reorder the rows and columns in order to more clearly reveal interesting patterns. For larger plots, you might want to try the `d3heatmap` or `heatmaply` packages, which create interactive plots.
+
+#### 7.5.2.1 Exercises
+
+* How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?
+
+* Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?
+
+* Why is it slightly better to use aes(x = color, y = cut) rather than aes(x = cut, y = color) in the example above?
+
+### 7.5.3 Two continuous variables
+
+But using transparency can be challenging for very large datasets. Another solution is to use bin. Previously you used `geom_histogram()` and `geom_freqpoly()` to bin in one dimension. Now you’ll learn how to use `geom_bin2d()` and `geom_hex()` to bin in two dimensions.
+
+```{r ch7531}
+
+ggplot(smaller) +
+  geom_bin2d(aes(carat, price))
+
+ggplot(diamonds) +
+  geom_bin2d(aes(carat, price))
+# install.packages("hexbin")
+
+ggplot(smaller) +
+  geom_hex(aes(carat, price))
+```
+
+Another option is to bin one continuous variable so it acts like a categorical variable. Then you can use one of the techniques for visualising the combination of a categorical and a continuous variable that you learned about. For example, you could bin carat and then for each group, display a boxplot:
+
+```{r ch7532}
+
+ggplot(smaller, aes(carat, price)) + 
+  geom_boxplot(aes(group = cut_width(carat, 0.1)))
+
+# the option varwidth let us see that each boxplot is representing a different number of obs
+ggplot(smaller, aes(carat, price)) + 
+  geom_boxplot(aes(group = cut_width(carat, 0.1)), varwidth = TRUE)
+
+# another option is to fix the number of points per bin and let the width of the box plot to reflect how much of the x axis is representing. I think the previous plot is more intuitive to understand
+ggplot(data = smaller, mapping = aes(x = carat, y = price)) + 
+  geom_boxplot(mapping = aes(group = cut_number(carat, 20)))
+
+```
+
+#### 7.5.3.1 Exercises
+
+* Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using cut_width() vs cut_number()? How does that impact a visualisation of the 2d distribution of carat and price?
+
+* Visualise the distribution of carat, partitioned by price.
+
+* How does the price distribution of very large diamonds compare to small diamonds? Is it as you expect, or does it surprise you?
+
+* Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.
+
+* Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.
+
+## 7.6 Patterns and models
+
+If you think of variation as a phenomenon that creates uncertainty, covariation is a phenomenon that reduces it. If two variables covary, you can use the values of one variable to make better predictions about the values of the second. If the covariation is due to a causal relationship (a special case), then you can use the value of one variable to control the value of the second.
+
+Models are a tool for extracting patterns out of data. For example, consider the diamonds data. It’s hard to understand the relationship between cut and price, because cut and carat, and carat and price are tightly related. It’s possible to use a model to remove the very strong relationship between price and carat so we can explore the subtleties that remain. The following code fits a model that predicts price from carat and then computes the residuals (the difference between the predicted value and the actual value). The residuals give us a view of the price of the diamond, once the effect of carat has been removed.
+
+```{r ch761}
+mod <- lm(log(price) ~ log(carat), data = diamonds)
+
+diamonds2 <- diamonds %>% 
+  add_residuals(mod) %>% 
+  mutate(resid = exp(resid))
+
+ggplot(diamonds2) + 
+  geom_point(aes(x = carat, y = resid))
+
+ggplot(diamonds2) + 
+  geom_boxplot(aes(cut, resid))
+
+```
+
+## 7.8 Learning more
+
+Another useful resource is the (R Graphics Cookbook by Winston Chang[http://www.cookbook-r.com/Graphs/]. 
 
 ## Notes for Chapter 8:
 
