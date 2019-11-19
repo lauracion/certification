@@ -1,0 +1,20 @@
+---
+title: "Chapters 9 and 10"
+author: "Laura"
+date: "11/19/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr)
+
+```
+
+## Notes for Chapter 9: Intro to Wrangling 
+
+
+
+## Notes for Chapter 10: Tibbles 
+

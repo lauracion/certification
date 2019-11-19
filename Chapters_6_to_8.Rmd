@@ -89,7 +89,7 @@ smaller <- diamonds %>%
 smaller %>% 
     ggplot(aes(carat)) +
     geom_histogram() +
-    geom_freqpoly(aes(color = reorder(cut, carat, FUN = median ), binwidth = 0.1))
+    geom_freqpoly(aes(color = reorder(cut, carat, FUN = median )))
 
 
 ```
@@ -459,6 +459,13 @@ ggplot(diamonds2) +
 Another useful resource is the (R Graphics Cookbook by Winston Chang[http://www.cookbook-r.com/Graphs/]. 
 
 ## Notes for Chapter 8:
+
+There is a great pair of keyboard shortcuts that will work together to make sure you’ve captured the important parts of your code in the editor:
+
+1. Press Cmd/Ctrl + Shift + F10 to restart RStudio.
+2. Press Cmd/Ctrl + Shift + S to rerun the current script.
+
+
 
 ## Wishlist:
 
