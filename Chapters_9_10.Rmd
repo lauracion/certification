@@ -15,6 +15,111 @@ library(tidyverse); library(skimr); library(nycflights13); library(GGally); libr
 ## Notes for Chapter 9: Intro to Wrangling 
 
 
-
 ## Notes for Chapter 10: Tibbles 
 
+### 10.2 Creating tibbles
+
+```{r ch1021}
+
+as_tibble(iris)
+
+tibble(
+  x = 1:5, 
+  y = 1, 
+  z = x ^ 2 + y
+)
+
+tb <- tibble(
+  `:)` = "smile", 
+  ` ` = "space",
+  `2000` = "number"
+)
+tb
+
+
+tribble(
+  ~x, ~y, ~z,
+  #--|--|----
+  # the previous line is there to mark where the header of the tibble is
+  "a", 2, 3.6,
+  "b", 1, 8.5
+)
+```
+
+### 10.3 Tibbles vs. data.frame
+
+```{r ch1031}
+
+tibble(
+  a = lubridate::now() + runif(1e3) * 86400,
+  b = lubridate::today() + runif(1e3) * 30,
+  c = 1:1e3,
+  d = runif(1e3),
+  e = sample(letters, 1e3, replace = TRUE)
+)
+
+```
+
+#### 10.3.2 Subsetting
+
+So far all the tools you’ve learned have worked with complete data frames. If you want to pull out a single variable, you need some new tools, `$` and `[[`. `[[` can extract by name or position; `$` only extracts by name but is a little less typing.
+
+To use these in a pipe, you’ll need to use the special placeholder `.`:
+
+```{r ch10321}
+
+df <- tibble(
+  x = runif(5),
+  y = rnorm(5)
+)
+
+df %>% .$x # equivalent to df$x in the non-pipe world
+df %>% .[["x"]] # equivalent to df[["x"]] in the non-pipe world
+
+```
+
+## 10.5 Exercises
+
+* How can you tell if an object is a tibble? (Hint: try printing `mtcars`, which is a regular data frame).
+
+* Compare and contrast the following operations on a data.frame and equivalent tibble. What is different? Why might the default data frame behaviours cause you frustration?
+
+```{r ex1051}
+df <- data.frame(abc = 1, xyz = "a")
+df$x
+df[, "xyz"]
+df[, c("abc", "xyz")]
+
+```
+
+* If you have the name of a variable stored in an object, e.g. var <- "mpg", how can you extract the reference variable from a tibble?
+
+* Practice referring to non-syntactic names in the following data frame by:
+
+1. Extracting the variable called 1.
+
+2. Plotting a scatterplot of 1 vs 2.
+
+3. Creating a new column called 3 which is 2 divided by 1.
+
+4. Renaming the columns to one, two and three.
+
+```{r ex1052}
+
+annoying <- tibble(
+  `1` = 1:10,
+  `2` = `1` * 2 + rnorm(length(`1`))
+)
+
+```
+
+* What does tibble::enframe() do? When might you use it?
+
+* What option controls how many additional column names are printed at the footer of a tibble?
+
+## Misc
+
+Ways to find help I am discovering:
+
+* `vignette("<packagename>")`
+* `package?<packagename>`
