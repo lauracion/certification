@@ -1,0 +1,396 @@
+---
+title: "Lanzamientos"
+author: "Dani"
+date: "10 de noviembre de 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+agencias <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-15/agencies.csv")
+
+lanzamientos <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-15/launches.csv")
+```
+
+```{r Explorar datos }
+
+ggplot(lanzamientos) + 
+  geom_histogram(aes(launch_year))
+
+#Quisiera que me haga un conteo de cantidad de lanzamientos
+
+lanzamientos %>% 
+  count(launch_year) %>% 
+  summary()
+
+lanzamientosAnioPais <- 
+  lanzamientos %>% 
+  group_by(launch_year, state_code) %>% 
+  summarise(conteo = n())
+
+summary(lanzamientosAnioPais)
+
+ggplot(lanzamientosAnioPais) +
+  geom_line(aes(launch_year, conteo, color = state_code))
+
+
+```
+
+```{r USRU}
+#Ahora los pido por potencias: UniÃ³n soviÃ©tica, Rusia, EEUU
+
+USRU <- filter(lanzamientos, state_code == "US" | state_code == "RU" | state_code == "SU") %>% 
+  group_by(launch_year, state_code) %>%
+  summarise(conteo = n())
+
+ggplot(USRU) +
+  geom_line(aes(launch_year, conteo, color = fct_reorder2(state_code, launch_year, conteo))) +
+  labs(
+    x = "Anio",
+    y = "Cantidad de lanzamientos",
+    title = "Comparacion de numero de lanzamientos entre Rusia y EEUU antes y despues de la URSS",
+    subtitle = " ",
+    color = "codigo de estado"
+  )
+
+#Hay un "agujerito" entre RU y SU. Quiero saber si la transiciÃ³n entre SU y RU dejÃ³ algÃºn aÃ±o sin lanzamientos
+
+USRU %>% 
+  filter(state_code == "SU") %>% 
+  summary()
+
+USRU %>% 
+  filter(state_code == "RU") %>% 
+  summary()
+
+#UnSov tiene lanzamientos hasta 1991. RU arranca en 1992. UnSov cae en Dic de 1991.
+
+
+```
+
+
+```{r interseccion}
+
+#Ahora quiero saber en quÃ© aÃ±o tienen la misma cantidad de lanzamientos URSS y EEUU.
+
+US <- filter(lanzamientos, state_code == "US") %>% 
+  group_by(launch_year) %>% 
+  summarise(conteoUS = n()) 
+  
+
+SU <- filter(lanzamientos, state_code == "SU") %>% 
+  group_by(launch_year) %>% 
+  summarise(conteoSU = n())
+
+for (anio in seq_along(US$launch_year[c(1:35)])) {
+  if (US$conteoUS[[anio]] <= SU$conteoSU[[anio]])
+    print(SU$launch_year[[anio]])
+  else
+    print("US > SU")
+}
+
+```
+
+Aca vemos que en el primer registro de 1957, EEUU lanzaba 1 contra URSS que lanzaba 2. Luego, hasta 1967, EEUU lanzo mayor cantidad de naves al espacio. A partir de 1967, URSS lanzo mayor cantidad, hasta su caida, en 1991. 
+
+Ahora quiero ver quÃ© otros paÃ­ses ademÃ¡s de EEUU y Rusia/URSS tienen mÃ¡s cantidad de lanzamientos.
+
+
+```{r TOP}
+lanzamientosAnioPais %>% 
+  arrange(desc(conteo))
+
+
+```
+URSS tiene un maximo absoluto de 108 lanzamientos en 1982
+
+Propongo graficar los primeros 5.
+
+Tengo dos formas de armar el TOP5:
+a) Cantidad total de lanzamientos
+b) Maximo en un anio determinado
+
+
+```{r Otros paises maximo}
+
+#Esto andarÃ­a, creo. Pero no le gusta que en el filter pida "SC", porque lo entiende como string y no lo toma como el SC del "for".
+
+#uniqueSC <- unique(lanzamientosAnioPais$state_code)
+
+#maximos <- list()
+#m <- list()
+#for (SC in seq_along(uniqueSC)) {
+#  maximo <-  max((filter(lanzamientosAnioPais, state_code == "SC"))$conteo)
+#  m <- c(maximo, SC)
+#  maximos <- c(maximos, m)
+#}
+
+#Esta es para el total de lanzamientos. Tiene el mismo inconveniente que la anterior.
+
+#for (SC in seq_along(uniqueSC)) {
+#  sum((filter(lanzamientosAnioPais, state_code == #"SC"))$conteo)
+#}
+
+#En vez de usar loops, podemos usar solo dplyr
+
+lanzamientos %>%
+ group_by(state_code, launch_year) %>%
+ count() %>%
+ group_by(state_code) %>%
+ filter(n == max(n)) %>% 
+  arrange(desc(n))
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#Si lo hago directamente desde LanzamientosAnioPais (que es un group by + count), no estarÃ­a pudiendo. Es decir:
+#lanzamientosAnioPais %>% 
+#group_by(conteo) %>% 
+#filter (conteo == max(conteo))
+
+```
+AcÃ¡ vemos que el TOP5 de mÃ¡ximos (mayor cantidad de lanzamientos en algun aÃ±o), estÃ¡ compuesto por:
+1. SU
+2. US
+3. RU
+4. CN
+5. F
+
+Para hacer el TOP5 de numero total de lanzamientos (suma de lanzamientos en todos los anios del registro):
+
+```{r otros paises total lanzamientos}
+
+lanzamientos %>% 
+  group_by(state_code) %>% 
+  count() %>% 
+  arrange(desc(n)) 
+#  %>%  .[1:5, ] si quisiera las primeras 5 solamente
+
+```
+
+El TOP5 de total de lanzameintos es el mismo que el de mÃ¡ximos. Lidera SU con 2444 lanzamientos. 
+
+Vamos a graficar los primeros 5 paÃ­ses, por aÃ±o: 
+
+```{r grafico primeros 5 por anio}
+
+lanzamientosAnioPais %>% 
+  filter(state_code == "SU" | state_code == "US" | state_code == "RU" | state_code == "F" | state_code == "CN") %>% 
+  ggplot() +
+  geom_line(aes(launch_year, conteo, color = fct_reorder2(state_code, launch_year, conteo))) +
+  labs(
+    color = "Codigo de estado",
+    x = "Anio de lanzamiento",
+    y = "Conteo",
+    title = "TOP 5 - lanzamientos"
+  )
+
+
+#POR QUÉ EL FCT_REORDER ME PONE A CN EN SEGUNDO LUGAR?
+
+```
+
+Quisiera hacer lo mismo pero incluir una categoría que sea "otros" y que incluya al resto de los que no están en el TOP5. 
+
+Voy a armar una lista con los state_code que no son top5 y luego hacer un fct_collapse: 
+
+```{r Otros} 
+#ESTE METODO NO ANDUVO. REVSAR.
+
+listaOtros = list()
+for (SC in seq_along(unique(lanzamientos$state_code))) {
+  if (SC != "US" & SC != "SU" & SC != "RU" & SC != "F" & SC != "CN")
+    print(unique(lanzamientos$state_code[SC])) #Me devuelve solo US
+      #listaOtros = c(listaOtros, unique(lanzamientos$state_code[SC]))
+}
+
+listaOtros
+
+```
+
+```{r Otros2}
+#Probamos otra forma:
+
+OtrosSC <- lanzamientos %>%
+  group_by(state_code) %>% 
+  count() %>% 
+  arrange(desc(n)) %>% 
+  select(state_code) %>% 
+  .[-(1:5),]
+
+OtrosSC
+```
+
+```{r Otros3}
+
+lanzamientosOtros <- lanzamientos %>% 
+  mutate(state_code = fct_lump(state_code, n = 5, other_level = "Otros")) %>% 
+  group_by(state_code, launch_year) %>% 
+  count()
+
+ggplot(lanzamientosOtros) +
+  geom_line(aes(x = launch_year, y = n, color = fct_reorder2(state_code, launch_year, n))) +
+  labs(
+    x = "anio",
+    y = "conteo",
+    color = "codigo de estado",
+    title = "Lanzamientos espaciales por anio según país"
+  )
+
+```
+
+Ahora, quiero buscar misiones especiales, como Apollo 11, el primero que llego a la Luna (Google dice que despego el 16 de Julio de 1969)
+
+```{r Apollo 11}
+
+lanzamientos %>% 
+  filter(launch_date == "1969-07-16")
+
+```
+La mision, se llamo "Apollo CM-107". Me gustaria marcarla en el grafico, asi como tambien a otros eventos importantes, tales como el primer lanzamiento tripulado (Vostok 1 - US - 1961) y la caida de la union sovietica (1991)
+
+```{r Grafico con Apolo}
+
+ggplot(lanzamientosOtros) +
+  geom_line(aes(x = launch_year, y = n, color = fct_reorder2(state_code, launch_year, n))) +
+  geom_vline(aes(xintercept = 1969), linetype = 2, color = "grey") +
+  geom_vline(aes(xintercept = 1961), linetype = 2, color = "grey") +
+  geom_vline(aes(xintercept = 1991), linetype = 2, color = "grey") +
+  labs(
+    x = "anio",
+    y = "cantidad de lanzamientos",
+    color = "codigo de estado",
+    title = "Lanzamientos espaciales por anio segun pais"
+  ) 
+
+
+```
+
+La primera linea corresponde a 1961, lanzamiento de la primera nave tripulada. US-Vostok 1. 
+La segunda linea corresponde a 1969, lanzamiento del Apollo 11, llegada del hombre a la luna. 
+La tercer linea corresponde a 1991, caida de la US. 
+
+Me hubiese gustado marcarlos en vertical como lo hice pero ponerles una leyenda en el grafico que acompanie. Tambien hubiese preferido que en fct_reorder me tire SU, US y RU primero. Tampoco explore que pasaba con los NAs. Queda pendiente.
+
+*- Lo del orden lo hace David Robinson en el video con un mutate(state_code = fct_reorder(state_code, -n, ¿sum?)), pero fuera del ggplot, él modifica la tibble (21:39). 
+
+Voy a explorar qué agencias fueron las que tuvieron más cantidad de lanzamientos. Para eso, hay que explorar la base "agencias".  
+Podría ver qué agencias tienen mas cantidad de lanzamientos segun si son privadas/estatales.
+
+```{r Agencias1}
+
+agencias %>% 
+  ggplot() +
+  geom_bar(aes(agency_type))
+
+agencias %>%
+  arrange(desc(count))
+
+agenciasOtros <- agencias %>% 
+  mutate(state_code = fct_lump(state_code, n = 5, other_level = "Otros"))
+
+agenciasOtros %>% 
+  mutate(state_code = state_code %>% fct_infreq() %>% fct_rev()) %>% 
+  ggplot() +
+  geom_bar(aes(state_code, fill = state_code)) +
+  facet_grid( ~ agency_type) +
+  coord_flip() +
+  labs(
+    title = "Cantidad de agencias segun tipo",
+    subtitle = "Si bien SU tiene gran cantidad de lanzamientos, todos ellos son estatales y salen de muy pocas agencias, a diferencia de US",
+    fill = "Codigo de estado",
+    x = " ",
+    y= "Cantidad de agencias"
+  )
+
+#Aca me gustaria modificar el orden en que aparecen los timpos de agencia. Quisiera que esté primero state, luego private y por último startup.
+#Ademas quisiera que los colores del fill sean presentados en orden de aparicion y no al reves.
+
+```
+
+¿Que agencia tiene mas lanzamientos?  
+
+```{r Agencias con mas lanzamientos}
+
+agencias <- agencias %>% 
+  rename("conteo" = count)
+
+agencias$conteo <- as.integer(agencias$conteo)
+
+#agenciasOtros2 <- agencias %>%
+#  mutate(conteo = fct_lump(conteo, n = 5, other_level = "Otros"))
+ #no me deja hacer fct_lump con "conteo". Pasa que no estoy "contando" un factor, sino que le estaria pasando directamente la cuantificacion.
+
+agenciasPrivadasOtras <- agencias %>%
+  filter(agency_type == "private" | agency_type == "startup" ) %>% 
+  mutate(agency = ifelse(conteo < 60, "Otras", agency)) 
+
+agenciasPrivadasOtras %>% 
+  ggplot() +
+  geom_point(aes(x = agency, y = conteo, color = state_code), size = 4) +
+  coord_flip() + 
+  labs(
+    title = "Lanzamientos en agencias privadas",
+    color = "Codigo de estado",
+    y = "Cantidad de lanzamientos",
+    x = "Agencia"
+  )
+
+agenciasEstatalesOtras <- agencias %>% 
+  filter(agency_type == "state") %>% 
+  mutate(agency = ifelse(conteo < 200, "Otras", agency)) %>% 
+  mutate(state_code = fct_lump(state_code, n = 5, other_level = "Otros"))
+
+agenciasEstatalesOtras %>% 
+  ggplot() +
+  geom_point(aes(x = agency, y = conteo, color = state_code), size = 4) +
+  coord_flip() + 
+  labs(
+    title = "Lanzamientos en agencias Estatales",
+    color = "Codigo de estado",
+    y = "Cantidad de lanzamientos",
+    x = "Agencia"
+  )
+
+#me hubiese gustado que se vean los colores en orden
+
+```
+No los presento en un mismo grafico con fct_grid porque la cantidad de lanzamientos segun agencia varia mucho por tipo. El nivel "otros" es distinto para estatal/privado.  
+
+Vamos a explorar que pasa con los datos faltantes.
+
+```{r Exploracion NAs}
+
+lanzamientos %>% 
+  filter(state_code == is.na(state_code))
+lanzamientos %>% 
+  filter(launch_year == is.na(launch_year))
+agencias %>% 
+  filter(parent == is.na(parent))
+
+```
+Ocurre que aca en vez de NAs tengo guiones en el dataset. Podria reemplazar guiones por "NA".  
+
+```{r NAs}
+
+agenciasNA <- agencias %>%
+  mutate(tstop = ifelse(tstop == "-", NA, tstop)) %>% 
+  view()
+
+#Podría generalizarlo para todas las columnas:
+
+#for(i in seq_along(agencias)){
+#  mutate(i = ifelse(i == "-", Na, i))
+#} %>% 
+#  view()
+
+#Este bucle no me anda! No le gusta "i" como data.
+
+#MAGICO!!!!!!!! 
+agenciasNA <- agencias %>%
+  na_if("-") %>% 
+  view()
+
+```
+
+
