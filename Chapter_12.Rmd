@@ -1,0 +1,62 @@
+---
+title: "Chapter 12"
+author: "Laura"
+date: "11/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr)
+
+```
+
+## Notes for Chapter 12 Tidy data
+
+### 12.2 Tidy data
+
+There are three interrelated rules which make a dataset tidy:
+
+1. Each variable must have its own column.
+2. Each observation must have its own row.
+3. Each value must have its own cell.
+
+#### 12.3.3 Exercises
+
+```{r ex12333}
+
+people <- tribble(
+  ~name,             ~key,    ~value,
+  #-----------------|--------|------
+  "Phillip Woods",   "age",       45,
+  "Phillip Woods",   "height",   186,
+  "Phillip Woods",   "age1",       50,
+  "Jessica Cordero", "age",       37,
+  "Jessica Cordero", "height",   156
+)
+people
+
+tidypeople <- people %>% 
+  spread(key = key, value = value)
+```
+
+#### 12.4.1 Separate
+
+```{r ch1241}
+
+table3 %<>% 
+  mutate(bla = rep("bla;", 6))
+
+table3 %>% 
+  separate(bla, into = c("newbla", "garbage")) %>%  #, remove = FALSE)) %>% 
+  select(-garbage) %>% 
+  rename(bla = newbla)
+
+(tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")))  %>% 
+  separate(x, c("one", "two", "three", "four"))
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>% 
+  separate(x, c("one", "two", "three"), fill = "right")
+```
+
