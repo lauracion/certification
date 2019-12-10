@@ -60,3 +60,35 @@ tibble(x = c("a,b,c", "d,e", "f,g,i")) %>%
   separate(x, c("one", "two", "three"), fill = "right")
 ```
 
+### 12.6 Case Study
+
+The WHO dataset: The data uses the original codes given by the World Health Organization. The column names for columns five through 60 are made by combining new_ to a code for method of diagnosis (rel = relapse, sn = negative pulmonary smear, sp = positive pulmonary smear, ep = extrapulmonary) to a code for gender (f = female, m = male) to a code for age group (014 = 0-14 yrs of age, 1524 = 15-24 years of age, 2534 = 25 to 34 years of age, 3544 = 35 to 44 years of age, 4554 = 45 to 54 years of age, 5564 = 55 to 64 years of age, 65 = 65 years of age or older).
+
+```{r ch1261}
+who
+
+who_longer <- who %>% 
+  pivot_longer(5:60, names_to = "key", 
+               values_to = "case_count") %>% 
+  separate(key, c("new", "rest"), sep =3) %>% 
+  select(-new) %>% 
+  separate(rest, c("diagnosis", "genderage"), sep = 3) %>% 
+  separate(genderage, c("gender", "age"), sep = 2) %>% 
+  mutate(diagnosis = case_when(diagnosis == "_sp" ~ "possmear",
+                               diagnosis == "_np" ~ "negsmear",
+                               diagnosis == "rel" ~ "relapse",
+                               diagnosis == "_ep" ~ "extrapul"),
+         gender = case_when(gender == "_f" ~ "female",
+                            gender == "_m" ~ "male"))
+         
+# this plot is fu
+who_longer %>% 
+  group_by(country, year, gender) %>% 
+  filter(case_count > 1 & year > 1990) %>% 
+  ggplot(aes(year, case_count, color = gender)) +
+  geom_line()
+
+glimpse(who_longer)
+
+```
+

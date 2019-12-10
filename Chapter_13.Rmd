@@ -1,0 +1,52 @@
+---
+title: "Chapter 13"
+author: "Laura"
+date: "12/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps)
+
+```
+
+## Notes for Chapter 13 Relational data
+
+### 13.4 Mutating joins
+
+```{r ch1341}
+flights %>% 
+  count(carrier)
+
+flights
+airlines
+
+flights2 <- flights %>% 
+  left_join(airlines, by = "carrier")
+```
+
+#### 13.4.6 Exercises
+
+```{r ex13461}
+
+flights2 <-  flights %>%
+  group_by(dest) %>% 
+  summarise(meandel = mean(arr_delay, rm.na = TRUE)) %>% 
+  ungroup() 
+
+# this doesnt work
+
+airports %>% 
+  semi_join(flights, c("faa" = "dest")) %>%
+  ggplot(aes(lon, lat)) +
+    borders("state") +
+    geom_point() +
+    coord_quickmap() +
+    theme_minimal() 
+
+```
+### 13.5 Filtering joins
+
+
