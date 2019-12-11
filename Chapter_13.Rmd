@@ -49,4 +49,21 @@ airports %>%
 ```
 ### 13.5 Filtering joins
 
+As indicated by its name, this is an alternative to `filter()` when the information you want to use to filter you current table is in a different table.
+
+Filtering joins match observations in the same way as mutating joins, but affect the observations, not the variables. There are two types:
+
+* semi_join(x, y) keeps all observations in x that have a match in y.
+* anti_join(x, y) drops all observations in x that have a match in y. It is the inverse of a semi-join is an anti-join. An anti-join keeps the rows that don’t have a match. Anti-joins are useful for diagnosing join mismatches.
+
+### 13.6 Join problems
+
+### 13.7 Set operations
+
+The final type of two-table verb are the set operations. Generally, I use these the least frequently, but they are occasionally useful when you want to break a single complex filter into simpler pieces. All these operations work with a complete row, comparing the values of every variable. These expect the x and y inputs to have the same variables, and treat the observations like sets:
+
+* intersect(x, y): return only observations in both x and y.
+* union(x, y): return unique observations in x and y.
+* setdiff(x, y): return observations in x, but not in y.
+
 
