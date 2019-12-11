@@ -1,0 +1,15 @@
+---
+title: "Chapter 14"
+author: "Laura"
+date: "12/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps)
+
+```
+
+## Notes for Chapter 14 Strings
