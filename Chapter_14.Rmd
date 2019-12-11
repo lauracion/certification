@@ -8,8 +8,35 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
-library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps)
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr)
 
 ```
 
 ## Notes for Chapter 14 Strings
+
+### 14.1 Introduction
+
+This chapter will focus on the stringr package for string manipulation. stringr is not part of the core tidyverse because you don’t always have textual data, so we need to load it explicitly.
+
+### 14.2 String basics
+
+Beware that the printed representation of a string is not the same as string itself, because the printed representation shows the escapes. To see the raw contents of the string, use writeLines():
+
+```{r ch1421}
+x <- c("\"", "\\")
+x
+writeLines(x)
+print(x) # equivalent to line 27, x
+
+?"'" #for help with special characters
+
+```
+Functions from stringr start with `str_`
+
+```{r ch1422}
+
+x <- c("Apple", "Banana", "Pear")
+str_sub(x, 2, -2)
+```
+
+
