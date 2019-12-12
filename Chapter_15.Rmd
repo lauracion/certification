@@ -94,4 +94,23 @@ gss_cat %>%
 ggplot(gss_cat) +
   geom_density(aes(tvhours))
 ```
+### 15.5 Modifying factor levels
+
+```{r ex1551}
+
+glimpse(gss_cat)
+levels(gss_cat$partyid)
+
+gss_cat %>% 
+  mutate(partyid = fct_collapse(partyid,
+                        rep = c("Strong republican", "Not str republican"),
+                        dem = c("Strong democrat", "Not str democrat"),
+                        ind = c("Ind,near rep", "Independent", "Ind,near dem"),
+                        other = c("No answer", "Don't know", "Other party"))) %>%   group_by(year) %>% 
+  count(partyid) %>% 
+  mutate(prop = n/sum(n)) %>% 
+  ggplot(aes(year, prop, color = partyid)) +
+    geom_line()
+
+```
 
