@@ -1,0 +1,16 @@
+---
+title: "Chapter 16"
+author: "Laura"
+date: "12/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj)
+
+```
+
+## Notes for Chapter 16 Dates and Times
+
