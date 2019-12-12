@@ -1,30 +1,30 @@
-# Data Wrangling Revisited
+# Data Wrangling Spoon 3
 
 # In this lesson we will learn to use dplyr::group_by() and dplyr::ungroup()
 # group_by can be used with the rest of the dplyr functions (e.g., filter, select)
 
-# As usual, we start by loading the libraries we will use
+# As usual, we start by loading the packages we will use
 library(tidyverse); library(gapminder)
 
 # Let's recall how gapminder looks like
 gapminder
 
-# Last class we saw how summarise can be used to calculate summary numbers for
+# Last class we saw how summarize can be used to calculate summary numbers for
 # our variables. For example the average for life expectancy
 gapminder %>% 
-    summarise(average = mean(lifeExp)) 
+    summarize(average = mean(lifeExp)) 
 
 # So, how would you go about calculating the average life expectancy 
 # for each continent rather than for the whole data set?
 # group_by() to the rescue!
 gapminder %>% 
-    group_by(continent) # note the "Groups: continent [5]" 
+    group_by(continent) # note the "Groups: continent [5]" in the output
 
 # Other ways to say "grouped by continent" are "sliced by continent", 
 # "aggregated by continent", "collapsed over continent"
 gapminder %>% 
     group_by(continent) # %>% 
-    summarise(average = mean(lifeExp))
+    summarize(average = mean(lifeExp))
 
 # _____________________________________
 # Let's practice some of what we know so far for wrangling our data
@@ -46,24 +46,24 @@ gapminder %>%
 # _____________________________________
 # Now we want the average life expectancy by continent and country
 gapminder %>% 
-    group_by(continent, country) # Note the "Groups: continent, country [142]
+    group_by(continent, country) # Note the "Groups: continent, country [142]" in the output
 
 gapminder %>% 
     group_by(continent, country) %>%  
-    summarise(average = mean(lifeExp))
+    summarize(average = mean(lifeExp))
 
 # But now you want to keep only the columns country and average in the output
 gapminder %>% 
     group_by(continent, country) %>% 
-    summarise(average = mean(lifeExp)) %>% 
+    summarize(average = mean(lifeExp)) %>% 
     select(country, average)
 
-# Oups! R through a warning at us and keeps the column continent
+# Oups! R gives a warning and keeps the column continent
 # What is going on?
 # To avoid having surprise problems with group_by(), everytime you use a 
 # group_by, it is a great habit to use ungroup()
 # Let us check how it works
-# problem go away
+# Adding ungroup() makes the problem go away
 gapminder %>% 
     group_by(continent, country) %>% 
     summarise(average = mean(lifeExp)) %>% 
