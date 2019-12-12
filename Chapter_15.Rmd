@@ -1,0 +1,97 @@
+---
+title: "Chapter 15"
+author: "Laura"
+date: "12/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats)
+
+```
+
+## Notes for Chapter 15 Factors
+
+To work with factors, we’ll use the forcats package, which provides tools for dealing with categorical variables (and it’s an anagram of factors!).
+
+### 15.2 Creating factors
+
+```{r ch1521}
+
+levels(gss_cat$race)
+
+gss_cat %>% 
+  count(race, sort = TRUE)
+
+ggplot(gss_cat) +
+  geom_bar(aes(race)) +
+  scale_x_discrete(drop = FALSE)
+
+levels(gss_cat$rincome)
+
+gss_cat %>% 
+  count(rincome, sort = TRUE) %>% 
+  ggplot(aes(rincome, n)) +
+    geom_col() +
+    coord_flip()
+
+```
+
+```{r ch1522}
+
+gss_cat %>% 
+  count(relig, sort = TRUE)
+
+gss_cat %>% 
+  count(partyid, sort = TRUE)
+
+
+gss_cat %>% 
+  count(relig, denom, sort = TRUE) %>% 
+  filter(denom != "Not applicable") %>% 
+  ggplot() +
+    geom_count(aes(relig, denom, size = n, color = n))
+
+
+levels(gss_cat$denom)
+
+ggplot(gss_cat) +
+  geom_count(aes(relig, denom))
+```
+
+# 15.4 Modifying factor order
+
+```{r ch1541}
+by_age <- gss_cat %>%
+  filter(!is.na(age)) %>%
+  count(age, marital) %>%
+  group_by(age) %>%
+  mutate(prop = n / sum(n))
+
+ggplot(by_age, aes(age, prop, colour = marital)) +
+  geom_line(na.rm = TRUE)
+
+ggplot(by_age, aes(age, prop, colour = fct_reorder2(marital, age, prop))) +
+  geom_smooth(se = FALSE, size = 0.1) +
+  labs(colour = "marital")
+
+# entendiendo que hizo exactamente esto
+gss_cat %>%
+  filter(!is.na(age)) %>%
+  count(age, marital) %>%
+  group_by(age) %>%
+  mutate(prop = n / sum(n))
+
+```
+
+```{r ch1542}
+
+gss_cat %>% 
+  arrange(desc(tvhours))
+
+ggplot(gss_cat) +
+  geom_density(aes(tvhours))
+```
+
