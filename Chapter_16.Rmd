@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
-library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj)
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj); library(lubridate)
 
 ```
 
