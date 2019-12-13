@@ -20,10 +20,16 @@ gapminder %>%
 gapminder %>% 
     group_by(continent) # note the "Groups: continent [5]" in the output
 
+# the result is grouped into rows that have the same combination of continent
+# values: all countries in Asia are treated as one group, all in Africa as another 
+# group and so on.
+
+# By itself, group_by doesn't do much
+
 # Other ways to say "grouped by continent" are "sliced by continent", 
 # "aggregated by continent", "collapsed over continent"
 gapminder %>% 
-    group_by(continent) # %>% 
+    group_by(continent)  %>% 
     summarize(average = mean(lifeExp))
 
 # _____________________________________
@@ -47,6 +53,10 @@ gapminder %>%
 # Now we want the average life expectancy by continent and country
 gapminder %>% 
     group_by(continent, country) # Note the "Groups: continent, country [142]" in the output
+
+# the result is grouped into rows that have the same combination of continent
+# and country values: all entries for Argentina in Americas are treated as one group,
+# all in Japan in Asia as another group and so on.
 
 gapminder %>% 
     group_by(continent, country) %>%  
@@ -75,17 +85,17 @@ gapminder %>%
 # _____________________________________
 # Homework: Let's practice a bit more
 # Complete the code missing so it calculates the average life expectancy by 
-# country between 1990 and 2007. 
+# continent each year between 1990 and 2007. 
 
 gapminder %>% 
     ____(between(year, 1990, 2007)) %>%
-    ____(country) %>% 
+    ____(continent, year) %>% 
     ____(average_1990_2007 = mean(lifeExp)) %>%
     ____()
 
 # Solution
 gapminder %>% 
     filter(between(year, 1990, 2007)) %>%
-    group_by(country) %>% 
+    group_by(continent, year) %>% 
     summarize(average_1990_2007 = mean(lifeExp)) %>%
     ungroup()
