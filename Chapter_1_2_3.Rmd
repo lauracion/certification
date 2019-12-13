@@ -13,7 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r packages, message=FALSE, warning=FALSE}
 library(tidyverse)
-# install.packages(c("nycflights13", "gapminder", "Lahman"))
 
 ```
 
@@ -290,3 +289,21 @@ ggplot(mpg, aes(x = factor(1), fill = drv)) +
   coord_polar(theta = "y")
 
 ```
+
+### Primer Quiz
+
+```{r}
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  geom_smooth(aes(color = cut), se = FALSE) +
+  theme_light() +
+  labs(title = "Ideal cut diamonds command the best price for every carat size",
+       subtitle = "Lines show GAM estimate of mean values for each level of cut",
+       caption = "Data provided by Hadley Wickham",
+       x = "Log Carat Size",
+       y = "Log Price Size") +
+  scale_color_brewer(palette = "Greens", name = "Cut Rating", label = c("Fair", "Good", "Very Good", "Premium", "Ideal")) +
+  scale_x_log10() +
+  scale_y_log10()
+```
+
