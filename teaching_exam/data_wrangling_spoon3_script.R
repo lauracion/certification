@@ -32,12 +32,12 @@ group_by(continent)
 filter(year == 2007)
 
 
-# _____________________________________
+# _______________________________________________
 # Homework: Let's practice a bit more
-# Complete the code missing so it calculates the average life expectancy by 
-# continent each year between 1990 and 2007. 
+# Complete the code missing so it stores in gapminder2 an ungrouped tibble including
+# the average life expectancy by continent each year between 1990 and 2007
 
-gapminder %>% 
+gapminder2 <- gapminder %>% 
     ____(between(year, 1990, 2007)) %>%
     ____(continent, year) %>% 
     ____(average_1990_2007 = mean(lifeExp)) %>%
