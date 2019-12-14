@@ -1,7 +1,7 @@
 ---
-title: "Chapters 17 to 19"
+title: "Chapter 20"
 author: "Laura"
-date: "12/12/2019"
+date: "12/14/2019"
 output: html_document
 ---
 
@@ -12,9 +12,5 @@ library(tidyverse); library(skimr); library(nycflights13); library(GGally); libr
 
 ```
 
-## Notes for Chapters 17 to 19
-
-## Chapter 18: Pipes
-
-## Chapter 19: Functions
+## Notes for Chapter 20: Vectors
 
