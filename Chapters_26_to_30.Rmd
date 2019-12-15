@@ -1,0 +1,61 @@
+---
+title: "Chapters 26 to 30"
+author: "Laura"
+date: "12/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj); library(lubridate)
+
+```
+
+## Notes for Chapters 26 to 30 - Communicate
+
+## Chapter 27: RMarkdown
+
+Text formatting 
+------------------------------------------------------------
+
+*italic*  or _italic_
+**bold**   __bold__
+`code`
+superscript^2^ and subscript~2~
+
+*   Bulleted list item 1
+
+*   Item 2
+
+    * Item 2a
+
+    * Item 2b
+
+1.  Numbered list item 1
+
+1.  Item 2. The numbers are incremented automatically in the output.
+
+
+## Chapter 28: Graphics for communication
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_smooth(se = FALSE, method = "lm") +
+  geom_point(aes(color = class)) +
+  labs(title = "Blablabla",
+       caption = "mas bla",
+       subtitle = "un poco mas de blablaba",
+       x = paste("blablala ", quote(x^2 + alpha)), #esto andara en la pc con LaTeX?
+       color = "La Clase")
+
+
+best <- mpg %>% 
+  group_by(class) %>% 
+  filter(hwy == max(hwy)) %>% 
+  distinct(model, .keep_all = TRUE)
+  
+best
+```
+
+
