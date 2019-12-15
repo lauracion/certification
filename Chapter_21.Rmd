@@ -8,9 +8,40 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
-library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj); library(lubridate)
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(stringr); library(htmlwidgets); library(forcats);  library(lubridate); #library(maps); library(mapproj);
 
 ```
 
 ## Notes for Chapter 21: Iteration
+
+```{r}
+mtcars %>% 
+  split(.$cyl) %>% 
+  map(~ lm(mpg ~ wt, data = .x))
+
+map(1:5, runif)
+
+# from primer
+nested_gapminder <-  gapminder %>%
+  group_by(country) %>%
+  nest()
+
+nested_gapminder %>%
+  pluck("data") %>%
+  pluck(1)
+
+nested_gapminder %>%  
+  pluck("data") %>%
+  map(~ lm(lifeExp ~ year, data = .))
+
+gap_models <-  nested_gapminder %>%
+  mutate(models = map(data, ~ lm(lifeExp ~ year, data = .x)))
+
+gap_coefs <- gap_models %>%
+  mutate(coefficient = map_dbl(models, ~ coef(.x) %>% pluck("year")))
+
+gap_coefs %>%
+  mutate(r_squared = map_dbl(models, ~ summary(.x) %>% pluck("r.squared")))
+```
+
 
