@@ -42,6 +42,8 @@ gap_coefs <- gap_models %>%
 
 gap_coefs %>%
   mutate(r_squared = map_dbl(models, ~ summary(.x) %>% pluck("r.squared")))
+
+
 ```
 
 
