@@ -66,25 +66,28 @@ gapminder %>%
     group_by(continent, country) %>%  
     summarize(average = mean(lifeExp))
 
-# But now you want to keep only the columns country and average in the output
+# Say now we want to keep only the columns country and average in the output
 gapminder %>% 
     group_by(continent, country) %>% 
     summarize(average = mean(lifeExp)) %>% 
     select(country, average)
 
 # Oups! R gives a warning and keeps the column continent
-# What is going on?
-# To avoid having surprise problems with group_by(), everytime you use a 
-# group_by, it is a great habit to use ungroup()
+# What is going on? R sees the tibble is grouped by continent and can't
+# let go of that column. We need to let go of the grouping. We can do that using
+# ungroup()
 # Let us check how it works
-# Adding ungroup() makes the problem go away
 gapminder %>% 
     group_by(continent, country) %>% 
     summarise(average = mean(lifeExp)) %>% 
     ungroup() %>% 
     select(country, average)
 
-# This is the result we wanted!
+# This is the result we wanted! Adding ungroup() makes the problem go away
+
+# Best practice: once you are done needing a grouping, cancel it using ungroup
+
+# Bonus: was ungroup needed in our first use of group_by today?
 
 # _______________________________________________
 # Homework: Let's practice a bit more
