@@ -3,12 +3,35 @@ title: "Chapters 26 to 30"
 author: "Laura"
 date: "12/15/2019"
 output: html_document
+bibliography: rmd.bib
+csl: apa.csl
+params:
+  year:
+    label: "Year"
+    value: 2017
+    input: slider
+    min: 2010
+    max: 2018
+    step: 1
+    sep: ""
+  region:
+    label: "Region:"
+    value: Europe
+    input: select
+    choices: [North America, Europe, Asia, Africa]
+  printcode:
+    label: "Display Code:"
+    value: TRUE
+  data:
+    label: "Input dataset:"
+    value: results.csv
+    input: file
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
-library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj); library(lubridate)
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj); library(lubridate); library(ggrepel); library(viridis)
 
 ```
 
@@ -37,6 +60,19 @@ superscript^2^ and subscript~2~
 1.  Item 2. The numbers are incremented automatically in the output.
 
 
+### Bibliography
+
+Separate multiple citations with a `;`: Blah blah [@smith04; @doe99].
+
+You can add arbitrary comments inside the square brackets: 
+Blah blah [see @doe99, pp. 33-35; also @smith04, ch. 1].
+
+Remove the square brackets to create an in-text citation: @smith04 
+says blah, or @smith04 [p. 33] says blah.
+
+Add a `-` before the citation to suppress the author's name: 
+Smith says blah [-@smith04].
+
 ## Chapter 28: Graphics for communication
 
 ```{r}
@@ -46,7 +82,7 @@ ggplot(mpg, aes(displ, hwy)) +
   labs(title = "Blablabla",
        caption = "mas bla",
        subtitle = "un poco mas de blablaba",
-       x = paste("blablala ", quote(x^2 + alpha)), #esto andara en la pc con LaTeX?
+       x = paste("blablala ", quote(x^2 + alpha)), #esto andara en la pc con LaTeX? noup
        color = "La Clase")
 
 
@@ -56,6 +92,27 @@ best <- mpg %>%
   distinct(model, .keep_all = TRUE)
   
 best
+
+ggplot(mpg, aes(displ, hwy)) +
+  geom_smooth(se = FALSE, method = "lm") +
+  geom_point(aes(color = class)) +
+  geom_point(size = 3, shape = 1, data = best) +
+  geom_label_repel(data = best, aes(label = model))
+
 ```
 
+```{r}
+medians <- mpg %>% 
+  group_by(class) %>% 
+  summarise(hwy = median(hwy),
+            displ = median(displ))
 
+ggplot(mpg, aes(displ, hwy, color = class)) +
+  geom_point() +
+  geom_label_repel(data = medians, aes(label = class), alpha = 0.5) +
+  theme(legend.position = "none")
+```
+
+## 28.4
+
+# References
