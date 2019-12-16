@@ -3,28 +3,28 @@
 # In this lesson we will learn to use dplyr::group_by() and dplyr::ungroup()
 # group_by can be used with the rest of the dplyr functions (e.g., filter, select)
 
-# As usual, we start by loading the packages we will use
+# We start by loading the packages we will use
 library(tidyverse); library(gapminder)
 
 # Let's recall how gapminder looks like
 gapminder
 
-# Last class we saw how summarize can be used to calculate summary numbers for
-# our variables. For example the average for life expectancy
+# Last class we learned how to use summarize to calculate summary numbers for
+# our variables. For example, the average for life expectancy
 gapminder %>% 
     summarize(average = mean(lifeExp)) 
 
-# So, how would you go about calculating the average life expectancy 
+# How would you go about calculating the average life expectancy 
 # for each continent rather than for the whole data set?
 # group_by() to the rescue!
 gapminder %>% 
     group_by(continent) # note the "Groups: continent [5]" in the output
 
-# the result is grouped into rows that have the same combination of continent
+# The result is grouped into rows that have the same combination of continent
 # values: all countries in Asia are treated as one group, all in Africa as another 
 # group and so on.
 
-# By itself, group_by doesn't do much
+# By itself, group_by only does this, not much really.
 
 # Other ways to say "grouped by continent" are "sliced by continent", 
 # "aggregated by continent", "collapsed over continent"
@@ -33,7 +33,8 @@ gapminder %>%
     summarize(average = mean(lifeExp))
 
 # _____________________________________
-# Let's practice some of what we know so far for wrangling our data
+# Exercise. Let's practice some of what we know so far for wrangling our data.
+
 # Order and indent the following lines of code to calculate the 
 # average life expectancy in 2007 in each continent. You will need to add
 # %>% at the end of some of the lines
