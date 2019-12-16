@@ -48,6 +48,9 @@ gapminder %>%
     filter(year == 2007) %>%
     group_by(continent) %>% 
     summarize(mean(lifeExp))
+
+# Did you notice that you can put filter before or after group_by,
+# but summarize must go after group_by?
     
 # _____________________________________
 # Now we want the average life expectancy by continent and country
