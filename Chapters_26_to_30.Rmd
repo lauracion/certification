@@ -2,7 +2,10 @@
 title: "Chapters 26 to 30"
 author: "Laura"
 date: "12/15/2019"
-output: html_document
+output:
+  html_document:
+    toc: true
+    number_sections: true
 bibliography: rmd.bib
 csl: apa.csl
 params:
@@ -35,7 +38,7 @@ library(tidyverse); library(skimr); library(nycflights13); library(GGally); libr
 
 ```
 
-## Notes for Chapters 26 to 30 - Communicate
+# Notes for Chapters 26 to 30 - Communicate
 
 ## Chapter 27: RMarkdown
 
