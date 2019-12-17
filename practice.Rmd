@@ -195,3 +195,115 @@ surveys %>%
   filter(is.na(date))
 ```
 
+Using pipes, subset the surveys data to include animals collected before 1995 and retain only the columns year, sex, and weight.
+
+```{r}
+surveys %>% 
+  filter(year < 1995) %>% 
+  select(year, sex, weight)
+```
+Create a new data frame from the surveys data that meets the following criteria: contains only the species_id column and a new column called hindfoot_half containing values that are half the hindfoot_length values. In this hindfoot_half column, there are no NAs and all values are less than 30.
+
+```{r}
+mine <- surveys %>% 
+  filter(hindfoot_length < 60 & !is.na(hindfoot_length)) %>% 
+  mutate(hindfoot_half = hindfoot_length / 2) %>% 
+  select(species_id, hindfoot_half)
+
+surveys_hindfoot_half <- surveys %>%
+    filter(!is.na(hindfoot_length)) %>%
+    mutate(hindfoot_half = hindfoot_length / 2) %>%
+    filter(hindfoot_half < 30) %>%
+    select(species_id, hindfoot_half)
+
+all.equal(mine, surveys_hindfoot_half)
+```
+
+How many animals were caught in each plot_type surveyed?
+
+Use group_by() and summarize() to find the mean, min, and max hindfoot length for each species (using species_id). Also add the number of observations (hint: see ?n).
+
+What was the heaviest animal measured in each year? Return the columns year, genus, species_id, and weight.
+
+```{r}
+surveys %>% 
+  group_by(year) %>%
+  filter(!is.na(weight)) %>% 
+  filter(weight == max(weight)) %>% 
+  select(year, genus, species_id, weight) %>% 
+  arrange(year)
+  
+surveys
+surveys %>% 
+  count(plot_type)
+
+surveys %>% 
+  filter(species_id %in% c("SS", "ST", "UR")) %>% 
+  select(species_id, hindfoot_length)
+surveys %>% 
+  group_by(species_id) %>% 
+  filter(!is.na(hindfoot_length)) %>% 
+  summarise(mean = mean(hindfoot_length),
+            min = min(hindfoot_length),
+            max = max(hindfoot_length),
+            n = n())
+```
+Spread the surveys data frame with year as columns, plot_id as rows, and the number of genera per plot as the values. You will need to summarize before reshaping, and use the function n_distinct() to get the number of unique genera within a particular chunk of data. It’s a powerful function! See ?n_distinct for more.
+
+```{r}
+swide <- surveys %>% 
+  group_by(year, plot_id) %>% 
+  summarise(unique_genera = n_distinct(genus)) %>% 
+  arrange(plot_id) %>% 
+  pivot_wider(names_from = year, values_from = unique_genera)
+```
+
+
+Now take that data frame and gather() it again, so each row is a unique plot_id by year combination.
+
+```{r}
+swide %>% 
+  pivot_longer(`1977`:`2002`, names_to = "year", 
+               values_to = "distinct_genera")
+```
+
+
+The surveys data set has two measurement columns: hindfoot_length and weight. This makes it difficult to do things like look at the relationship between mean values of each measurement per year in different plot types. Let’s walk through a common solution for this type of problem. First, use gather() to create a dataset where we have a key column called measurement and a value column that takes on the value of either hindfoot_length or weight. Hint: You’ll need to specify which columns are being gathered.
+
+```{r}
+survlong <- surveys %>% 
+  pivot_longer(cols = c(hindfoot_length, weight), 
+               names_to = "measurement", values_to = "value")
+```
+
+
+With this new data set, calculate the average of each measurement in each year for each different plot_type. Then spread() them into a data set with a column for hindfoot_length and weight. Hint: You only need to specify the key and value columns for spread().
+
+```{r}
+survlong %>% 
+  group_by(year, plot_type, measurement) %>% 
+  filter(!is.na(value)) %>% 
+  summarize(mean = mean(value)) %>% 
+  pivot_wider(names_from = measurement, values_from = mean)
+```
+### Some plotting
+
+```{r}
+surveys_complete <- read_csv("data/portal_data_joined.csv")
+
+yearly_sex_counts <- surveys_complete %>%
+  count(year, genus, sex)
+
+ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color = sex)) +
+    geom_line() +
+    facet_wrap(vars(genus)) +
+    labs(title = "Observed genera through time",
+        x = "Year of observation",
+        y = "Number of individuals") +
+    theme_bw() +
+    theme(axis.text.x = element_text(colour = "grey20", size = 12, angle = 90, hjust = 0.5, vjust = 0.5),
+                        axis.text.y = element_text(colour = "grey20", size = 12),
+          text = element_text(size = 16))
+# if you put theme_ at the end the other them statement is not followed (at least not well)
+```
+
