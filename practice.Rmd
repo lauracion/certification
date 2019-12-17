@@ -1,0 +1,73 @@
+---
+title: "Practising_w_swc"
+author: "Laura"
+date: "12/16/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+```{r}
+cats <- tibble(coat = c("calico", "black", "tabby"), 
+                    weight = c(2.1, 5.0, 3.2), 
+                    likes_string = c(1, 0, 1))
+cats %>% 
+  write_csv(path = "data/feline-data.csv")
+
+read_csv("data/feline-data.csv")
+
+gapminder <- read_csv("data/gapminder_data.csv")
+str(gapminder)
+colnames(gapminder)
+```
+```{r}
+gapminder %>% 
+  ggplot(aes(year, lifeExp, by = country)) +
+  geom_point() +
+  geom_line(aes(color = continent)) 
+
+gapminder %>% 
+  ggplot(aes(gdpPercap, lifeExp, 
+             by = continent, color = continent)) +
+    geom_point(alpha = 0.5, aes(shape = continent)) +
+    geom_smooth(method = "lm") +
+    scale_x_log10()
+
+gapminder %>% 
+  filter(continent == "Americas") %>% 
+  ggplot(aes(year, lifeExp)) +
+    facet_wrap(~ country) +
+    geom_line() + 
+    theme(axis.text.x = element_text(angle = 45))
+
+
+lifeExp_plot <- gapminder %>% 
+  filter(continent == "Americas") %>% 
+  ggplot(aes(year, lifeExp)) +
+    facet_wrap(~ country) +
+    geom_line() + 
+    labs(x = "Year",              # x axis title
+         y = "Life expectancy",   # y axis title
+         title = "Figure 1",      # main title of figure
+         color = "Continent"      # title of legend
+         ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggsave(filename = "results/lifeExp.png", plot = lifeExp_plot, width = 12, height = 10, dpi = 300, units = "cm")
+```
+
+```{r}
+gapminder %>% 
+  ggplot(aes(year, lifeExp)) +
+    facet_grid(~ continent) +
+    geom_boxplot(aes(group = year)) +
+    labs(y = "Life Expectancy", x = "") +
+    theme(axis.text.x = element_blank(),
+          axis.ticks.x = element_blank())
+```
+
+
