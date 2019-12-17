@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 	warning = FALSE,
 	results = "hide"
 )
-library(tidyverse); library(lubridate)
+library(tidyverse); library(lubridate); library(babynames)
 ```
 
 ```{r}
@@ -305,5 +305,61 @@ ggplot(data = yearly_sex_counts, mapping = aes(x = year, y = n, color = sex)) +
                         axis.text.y = element_text(colour = "grey20", size = 12),
           text = element_text(size = 16))
 # if you put theme_ at the end the other them statement is not followed (at least not well)
+```
+
+### Primers dplyr challenge
+
+```{r}
+babynames %>% 
+  group_by(year, sex) %>% 
+  mutate(rank = min_rank(desc(n))) %>% 
+  filter(rank == 1, sex == "M") %>% 
+  ungroup() %>% 
+  summarise(distinct = n_distinct(name))
+  
+ babynames %>%
+  filter(sex == "M") %>%
+  group_by(year) %>%
+  filter(n == max(n)) %>%
+  ungroup() %>%
+  count(name) 
+```
+
+Which gender uses more names?
+
+In the chunk below, calculate and then plot the number of distinct names used each year for boys and girls. Place year on the x axis, the number of distinct names on they y axis and color the lines by sex.
+
+```{r}
+babynames %>%
+  group_by(sex, year) %>%
+  summarize(distinct = n_distinct(name)) %>%
+  ggplot(aes(year, distinct, color = sex)) +
+    geom_line() +
+    theme_bw()
+
+```
+
+Let’s make sure that we’re not confounding our search with the total number of boys and girls born each year. With the chunk below, calculate and then plot over time the total number of boys and girls by year. Is the relative number of boys and girls constant?
+
+```{r}
+babynames %>%
+  group_by(sex, year) %>%
+  summarize(total = sum(n)) %>%
+  ggplot(aes(year, total, color = sex)) + 
+    geom_line()
+```
+
+Hmm. Sometimes there are more girls and sometimes more boys. In addition, the entire population has been grown over time. Let’s account for this weith a new metric: the average number of children per name.
+
+If girls have a smaller number of children per name, that would imply that they use more names overall (and vice versa).
+
+In the chunk below, calculate and plot the average number of children per name by year and sex over time. How do you interpret the results?
+
+```{r}
+babynames %>%
+  group_by(sex, year) %>%
+  summarise(average = mean(n)) %>%
+  ggplot(aes(year, average, color = sex)) + 
+    geom_line()
 ```
 
