@@ -6,9 +6,15 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-library(tidyverse)
+knitr::opts_chunk$set(
+	echo = FALSE,
+	fig.path = "Figs/",
+	fig.width = 11,
+	message = FALSE,
+	warning = FALSE,
+	results = "hide"
+)
+library(tidyverse); library(lubridate)
 ```
 
 ```{r}
@@ -24,6 +30,9 @@ gapminder <- read_csv("data/gapminder_data.csv")
 str(gapminder)
 colnames(gapminder)
 ```
+
+### Creating Publication-Quality Graphics with ggplot2
+
 ```{r}
 gapminder %>% 
   ggplot(aes(year, lifeExp, by = country)) +
@@ -70,4 +79,119 @@ gapminder %>%
           axis.ticks.x = element_blank())
 ```
 
+### Dataframe Manipulation with dplyr
+
+```{r}
+gapminder %>% 
+  filter(continent == "Africa") %>% 
+  select(lifeExp, country, year)
+
+gapminder %>% 
+  group_by(country) %>% 
+  summarise(mean_life_exp = mean(lifeExp)) %>% 
+  arrange(desc(mean_life_exp)) %>% 
+  tail()
+```
+Calculate the average life expectancy in 2002 of 2 randomly selected countries for each continent. Then arrange the continent names in reverse order. Hint: Use the dplyr functions arrange() and sample_n(), they have similar syntax to other dplyr functions.
+
+```{r}
+
+gdp_future_bycontinents_byyear_high_lifeExp <- gapminder %>%
+    mutate(gdp_futureExpectation = ifelse(lifeExp > 40, gdpPercap * 1.5, gdpPercap)) %>%
+    group_by(continent, year) %>%
+    summarize(mean_gdpPercap = mean(gdpPercap),
+              mean_gdpPercap_expected = mean(gdp_futureExpectation))
+
+gapminder %>%
+   # Get the start letter of each country
+   mutate(startsWith = substr(country, start = 1, stop = 1)) %>%
+   # Filter countries that start with "A" or "Z"
+   filter(startsWith %in% c("A", "Z")) %>%
+   # Make the plot
+   ggplot(aes(x = year, y = lifeExp, color = continent)) +
+   geom_line() +
+   facet_wrap( ~ country)
+
+gapminder %>% 
+  filter(year == 2002) %>% 
+  group_by(continent) %>% 
+  sample_n(2) %>% 
+  summarise(mean_le = mean(lifeExp)) %>% 
+  arrange(desc(continent))
+```
+### Dataframe Manipulation with tidyr
+
+```{r}
+gap_wide <- read_csv("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/gh-pages/_episodes_rmd/data/gapminder_wide.csv")
+
+glimpse(gap_wide)
+
+gap_long <- gap_wide %>% 
+  pivot_longer(cols = c(starts_with("gdp"), 
+                        starts_with("lifeExp"),
+                        starts_with("pop")),
+               names_to = "obstype_year",
+               values_to = "obs_value")
+glimpse(gap_long)
+
+gap_long <- gap_long %>% 
+  separate(obstype_year, 
+           into = c("obstype", "year"), 
+           convert = TRUE)
+glimpse(gap_long)
+gap_long
+
+gap_long %>% 
+  group_by(continent, obstype) %>% 
+  summarize(mean = mean(obs_value))
+
+gap_normal <- gap_long %>% 
+  pivot_wider(names_from = obstype, values_from = obs_value)
+
+gap_normal
+
+```
+Now let’s convert the long all the way back to the wide. In the wide format, we will keep country and continent as ID variables and pivot the observations across the 3 metrics (pop,lifeExp,gdpPercap) and time (year). First we need to create appropriate labels for all our new variables (time*metric combinations) and we also need to unify our ID variables to simplify the process of defining gap_wide.
+
+```{r}
+gap_long
+gap_long %>% 
+  unite("obstype_year", obstype, year) %>% 
+  unite("continent_country", continent, country) %>% 
+  pivot_wider(names_from = obstype_year, values_from = obs_value)
+
+gap_long %>% 
+  unite("country_obstype_year", country, obstype, year) %>% 
+  pivot_wider(names_from = country_obstype_year, values_from = obs_value)
+
+```
+
+### Data Analysis and Visualization in R for Ecologists
+
+```{r}
+class(num_char <- c(1, 2, 3, "a"))
+class(num_logical <- c(1, 2, 3, TRUE))
+class(char_logical <- c("a", "b", "c", TRUE))
+class(tricky <- c(1, 2, 3, "4"))
+
+heights <- c(63, 69, 60, 65, NA, 68, 61, 70, 61, 59, 64, 69, 63, 63, NA, 72, 65, 64, 70, 63, 65)
+
+median(na.omit(heights))
+sum(na.omit(heights) > 67)
+```
+
+```{r}
+download.file(url="https://ndownloader.figshare.com/files/2292169",
+              destfile = "data/portal_data_joined.csv")
+
+surveys <- read_csv("data/portal_data_joined.csv")
+glimpse(surveys)
+str(surveys)
+
+surveys$date <- mdy(paste(surveys$month, surveys$day, surveys$year, sep = "-"))
+
+surveys %>% 
+  select(month, day, year, date) %>% 
+  filter(is.na(date))
+```
 
