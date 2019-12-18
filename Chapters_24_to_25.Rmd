@@ -1,0 +1,157 @@
+---
+title: "Chapters 24 and 25"
+author: "Laura"
+date: "12/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+
+library(tidyverse); library(skimr); library(nycflights13); library(GGally); library(ggstance); library(lvplot); library(hexbin); library(modelr); library(magrittr); library(maps); library(stringr); library(htmlwidgets); library(forcats); library(mapproj); library(lubridate); library(babynames); library(splines)
+
+```
+
+# Notes for Chapters 24 and 25
+
+## Chapter 24: Model Building
+
+```{r}
+flights %>% 
+  mutate(date = make_date(year, month, day)) %>% 
+  count(date) %>% 
+  ggplot(aes(date, n)) +
+    geom_line()
+
+daily <- flights %>% 
+  mutate(date = make_date(year, month, day)) %>% 
+  count(date)
+
+daily %>% 
+  mutate(wday = wday(date, label = TRUE)) %>% 
+  ggplot(aes(wday, n)) +
+    geom_boxplot()
+
+weekly <- daily %>% 
+  mutate(wday = wday(date, label = TRUE))
+
+mod <- lm(n ~ wday, data = weekly)
+
+# predictions
+grid <- weekly %>% 
+  data_grid(wday) %>% 
+  add_predictions(mod, "n")
+grid
+
+weekly %>% 
+  ggplot(aes(wday, n)) +
+    geom_boxplot() +
+    geom_point(data = grid, color = "red", size = 4)
+
+# residuals
+res <- weekly %>% 
+  add_residuals(mod, "resid")
+  
+res %>% 
+  ggplot(aes(date, resid)) +
+    geom_line(aes(color = wday)) +
+    geom_ref_line(h = 0, colour = "black", size = 0.5) +
+    scale_colour_viridis_d() +
+    theme_bw() +
+    labs(color = "Weekday", title = "Bla")
+ 
+res %>% 
+  ggplot(aes(date, resid)) +
+    geom_smooth(se = FALSE, span = 0.1) +
+    geom_line(color = "grey") +
+    geom_ref_line(h = 0, colour = "black", size = 0.5)
+   
+
+```
+
+```{r}
+weekly %>% 
+  filter(wday == "Sat") %>% 
+  ggplot(aes(date, n)) +
+    geom_line() +
+    geom_point() +
+    scale_x_date(date_breaks = "1 month", date_labels = "%b")
+
+terms <- function(date){
+  cut(date,
+      breaks = ymd(20130101, 20130605, 20130825, 20140101),
+      labels = c("spring", "summer", "fall"))
+}
+
+terms <- weekly %>% 
+  mutate(term = terms(date)) 
+
+terms%>% 
+  filter(wday == "Sat") %>% 
+  ggplot(aes(date, n, color = term)) +
+    geom_line() +
+    geom_point() +
+    scale_x_date(date_breaks = "1 month", date_labels = "%b")
+
+terms$wday <-  fct_relevel(terms$wday, "Sun", after = 7)
+
+terms %>% 
+  ggplot(aes(wday, n, color = term)) +
+    geom_boxplot()
+  
+```
+```{r}
+terms
+
+mod1 <- lm(n ~ wday, data = terms)
+mod2 <- lm(n ~ wday * term, data = terms)
+
+terms %>% 
+  gather_residuals(wterm = mod1, woterm = mod2) %>% 
+  ggplot(aes(date, resid, color = model)) +
+    geom_line()
+
+grid <- terms %>% 
+  data_grid(wday, term) %>% 
+  add_predictions(mod1, "n")
+
+terms %>% 
+  ggplot(aes(wday, n)) +
+    geom_boxplot() +
+    geom_point(data = grid, color = "red") +
+    facet_grid(cols = vars(term)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+mod3 <- MASS::rlm(n ~ wday * term, data = terms)
+
+rterms <- terms %>% 
+  add_residuals(mod3) 
+
+rterms %>% ggplot(aes(date, resid)) +
+    geom_line()
+  
+  
+```
+```{r}
+
+mod <- MASS::rlm(n ~ wday * ns(date, 5), data = weekly)
+
+weekly %>% 
+  data_grid(wday, date = seq_range(date, by = 13)) %>% 
+  add_predictions(mod, "pred") %>% 
+  ggplot(aes(date, pred, color = wday)) +
+    geom_line() +
+    geom_point() 
+
+mod1 <- MASS::rlm(n ~ wday * date, data = weekly)
+
+weekly %>% 
+  data_grid(wday, date = seq_range(date, by = 13)) %>% 
+  add_predictions(mod1, "pred") %>% 
+  ggplot(aes(date, pred, color = wday)) +
+    geom_line() +
+    geom_point() 
+```
+
+## Chapter 19: Functions
+

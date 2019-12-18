@@ -190,6 +190,8 @@ str(surveys)
 
 surveys$date <- mdy(paste(surveys$month, surveys$day, surveys$year, sep = "-"))
 
+surveys$date <- make_date(surveys$year, surveys$month, surveys$day)
+
 surveys %>% 
   select(month, day, year, date) %>% 
   filter(is.na(date))
